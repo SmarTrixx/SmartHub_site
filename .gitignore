@@ -5,6 +5,10 @@ node_modules/
 dist/
 build/
 
+# no backend yet
+backend/
+
+
 # misc
 .DS_Store
 .env.local
