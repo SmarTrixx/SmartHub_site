@@ -3,7 +3,9 @@ import Home from '../pages/Home';
 import Services from '../pages/Services';
 import Portfolio from '../pages/Portfolio';
 import Contact from '../pages/Contact';
-import About from '../pages/About'; 
+import About from '../pages/About';
+import Privacy from '../pages/Privacy';
+import Terms from '../pages/Terms';
 
 const AppRoutes = () => (
   <Routes>
@@ -12,6 +14,8 @@ const AppRoutes = () => (
     <Route path="/portfolio" element={<Portfolio />} />
     <Route path="/contact" element={<Contact />} />
     <Route path="/about" element={<About />} />
+    <Route path="/privacy" element={<Privacy />} />
+    <Route path="/terms" element={<Terms />} />
     {/* Add more routes as needed */}
   </Routes>
 );
