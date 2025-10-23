@@ -47,7 +47,7 @@ const Footer = () => {
       icon: <FiGithub className="text-xl" />,
       url: "https://github.com/smarthub",
       label: "GitHub",
-      color: "bg-gray-100 text-gray-600"
+      color: "bg-gray-100 text-gray-800"
     },
     {
       icon: <FiLinkedin className="text-xl" />,
@@ -77,23 +77,23 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative bg-gradient-to-r from-[#0057FF]/5 to-cyan-100 border-t border-gray-200 pt-0 pb-8 px-4 md:px-6">
+    <footer className="relative bg-gradient-to-r from-[#0057FF]/5 to-white-500 border-t border-gray-200 pt-0 pb-8 px-4 md:px-6">
       <div className="max-w-7xl mx-auto pt-4">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#0057FF]/10 flex items-center justify-center">
+              <div className="w-13 h-13 rounded-full flex items-center justify-center">
                 <img 
-                  src="/images/portfolio4.png" 
+                  src="/images/smartlogo2.png" 
                   alt="Sm@rtHub Logo" 
-                  className="w-6 h-6 object-contain"
+                  className="w-13 h-8 "
                 />
               </div>
               <span className="font-bold text-lg text-[#0057FF]">Sm@rtHub</span>
             </div>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-800 text-md">
               Building innovative solutions for the digital world.
             </p>
             <div className="flex gap-3">
@@ -116,13 +116,13 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Quick Links</h3>
+            <h3 className="font-bold text-gray-800 mb-4">Quick Links</h3>
             <ul className="space-y-2">
               {navLinks.map((link) => (
                 <li key={link.to}>
                   <a 
                     href={link.to} 
-                    className="text-gray-600 hover:text-[#0057FF] transition-colors text-sm"
+                    className="text-gray-800 hover:text-[#0057FF] transition-colors text-md"
                   >
                     {link.label}
                   </a>
@@ -133,13 +133,13 @@ const Footer = () => {
 
           {/* Resources */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Resources</h3>
+            <h3 className="font-bold text-gray-800 mb-4">Resources</h3>
             <ul className="space-y-2">
               {footerLinks.map((link, index) => (
                 <li key={index}>
                   <a 
                     href={link.url} 
-                    className="text-gray-600 hover:text-[#0057FF] transition-colors text-sm"
+                    className="text-gray-800 hover:text-[#0057FF] transition-colors text-md"
                   >
                     {link.name}
                   </a>
@@ -150,20 +150,20 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Newsletter</h3>
-            <p className="text-gray-600 text-sm mb-3">
+            <h3 className="font-bold text-gray-800 mb-4">Newsletter</h3>
+            <p className="text-gray-800 text-md mb-3">
               Subscribe to our newsletter for the latest updates.
             </p>
             <form className="flex gap-2">
               <input 
                 type="email" 
                 placeholder="Your email" 
-                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF] focus:border-transparent"
+                className="flex-1 px-3 py-2 text-md border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF] focus:border-transparent"
                 required
               />
               <button 
                 type="submit" 
-                className="px-4 py-2 bg-[#0057FF] text-white text-sm font-medium rounded-lg hover:bg-[#0047D4] transition-colors"
+                className="px-4 py-2 bg-[#0057FF] text-white text-md font-medium rounded-lg hover:bg-[#0047D4] transition-colors"
               >
                 Subscribe
               </button>
@@ -173,8 +173,8 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-gray-200 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-gray-600 text-sm">
-            © {currentYear} <span className="font-semibold text-[#0057FF]">Sm@rtHub</span>. All rights reserved.
+          <div className="text-gray-800 text-md">
+            © {currentYear} <span className="font-bold text-[#0057FF]">Sm@rtHub</span>. All rights reserved.
           </div>
           
           <div className="flex items-center gap-4">
@@ -182,7 +182,7 @@ const Footer = () => {
               <a 
                 key={index}
                 href={link.url} 
-                className="text-gray-600 hover:text-[#0057FF] transition-colors text-sm"
+                className="text-gray-800 hover:text-[#0057FF] transition-colors text-md"
               >
                 {link.name}
               </a>

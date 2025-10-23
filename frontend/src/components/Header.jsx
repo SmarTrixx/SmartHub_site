@@ -31,10 +31,10 @@ const Header = () => {
   }, [location]);
 
   return (
-    <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+    <header className={`sticky top-0 z-50 w-full transition-all duration-300 shadow-md ${
       isScrolled 
-        ? 'bg-[#0069ff]/90 backdrop-blur-md shadow-lg' 
-        : 'bg-[#0069ff]/70 backdrop-blur-md'
+        ? 'bg-[#ffffff]/70 backdrop-blur-md shadow-lg' 
+        : 'bg-[#ffffff]/90 backdrop-blur-md'
     }`}>
       <div className="max-w-7xl mx-auto flex justify-between items-center p-4 md:px-6 lg:px-8">
         {/* Logo/Brand */}
@@ -44,10 +44,10 @@ const Header = () => {
         >
           <motion.div 
             whileHover={{ scale: 1.05 }}
-            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#5C85F2]/80 flex items-center justify-center shadow-lg border border-white/10 overflow-hidden"
+            className="w-15 h-15 md:w-13 md:h-12 rounded-full  "
           >
             <img 
-              src="/images/portfolio4.png" 
+              src="/images/smartlogo2.png" 
               alt="SmartHub Logo"
               className="w-full h-full object-cover"
             />
@@ -55,7 +55,7 @@ const Header = () => {
           <motion.span 
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            className="hidden sm:inline text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100"
+            className="hidden sm:inline text-transparent bg-clip-text bg-gradient-to-r from-black to-blue-300"
           >
             Sm@rtHub
           </motion.span>
@@ -74,8 +74,8 @@ const Header = () => {
                 to={link.to}
                 className={`relative px-4 py-2 rounded-lg font-medium transition-all ${
                   location.pathname === link.to
-                    ? 'text-white bg-white/20'
-                    : 'text-white/90 hover:text-white hover:bg-white/10'
+                    ? 'text-white bg-[#5C85F2]/90'
+                    : 'text-black/90 hover:text-black hover:bg-black/10'
                 }`}
               >
                 {link.label}
@@ -100,7 +100,7 @@ const Header = () => {
         >
           <Link
             to="/contact"
-            className="px-6 py-3 border-2 border-white bg-[white]/30 text-[#ffffff] font-semibold rounded-full hover:bg-gray-100 transition-colors shadow-md hover:shadow-lg"
+            className="px-6 py-3 border-2 border-#5C85F2 bg-[#5C81F7]/100 text-[#ffffff] font-semibold rounded-full hover:bg-gray-100 transition-colors shadow-md hover:shadow-lg"
           >
             Get Started
           </Link>

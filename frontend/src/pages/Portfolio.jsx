@@ -37,7 +37,7 @@ const Portfolio = () => {
     const timer = setTimeout(() => {
       setFilteredItems(filtered);
       setIsLoading(false);
-    }, 300);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [activeFilter, searchTerm]);
@@ -56,7 +56,7 @@ const Portfolio = () => {
     <div className="relative min-h-screen">
       {/* Background and main content */}
       <div
-        className="fixed inset-0 z-0 bg-cover bg-center"
+        className="fixed inset-0 z-0 bg-cover bg-center opacity-10"
         style={{
           backgroundImage: "url('/images/bg1.jpg')", // <-- Replace with your image path
         }}
@@ -115,7 +115,7 @@ const Portfolio = () => {
                   <button
                     key={tag}
                     onClick={() => setActiveFilter(tag)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === tag
+                    className={`px-4 py-2 rounded-full text-md font-medium transition-all ${activeFilter === tag
                         ? 'bg-[#0057FF] text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
@@ -167,16 +167,16 @@ const Portfolio = () => {
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0088ff]/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                    {/* <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                       {item.tags.map((tag, idx) => (
                         <span
                           key={idx}
-                          className="bg-[#FFFFFF]/90 text-[#0057FF] text-xs font-semibold px-3 py-1 rounded-full shadow-xl border-2 border-gray-200"
+                          className="bg-[#0057FF]/60 text-[#FFFFFF] text-xs font-semibold px-3 py-1 rounded-full shadow-xl border-2 border-gray-200"
                         >
                           {tag}
                         </span>
                       ))}
-                    </div>
+                    </div> */}
                     <button
                       onClick={() => handleItemClick(item)}
                       className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"

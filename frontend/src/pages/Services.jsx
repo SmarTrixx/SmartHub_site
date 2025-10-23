@@ -5,16 +5,16 @@ const Services = () => (
   <div className="relative min-h-screen overflow-hidden">
     {/* Background image and overlay */}
     <div
-      className="fixed inset-0 z-0 bg-cover bg-center"
+      className="fixed inset-0 z-0 bg-cover bg-center opacity-20"
       style={{
         backgroundImage: "url('/images/bg.jpg')",
       }}
       aria-hidden="true"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0057FF]/50 via-white/80 to-cyan-200/60" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#5C85F2]/50 via-white/80 to-cyan-200/40" />
     </div>
 
-    <div className="relative z-10 py-24 px-4 min-h-screen flex flex-col items-center">
+    <div className="relative z-10 py-24 px-4 min-h-screen flex flex-col items-center backdrop-blur-sm">
       <div className="max-w-3xl mx-auto text-center mb-16">
         <span className="inline-block px-4 py-2 bg-[#0057FF]/90 text-[#FFFFFF] rounded-full text-md font-extrabold mb-4">
           OUR SERVICES

@@ -37,7 +37,7 @@ const About = () => (
       }}
       aria-hidden="true"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0057FF]/50 via-white/70 to-cyan-200/30" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0057FF]/10 via-white/80 to-cyan-200/10 backdrop-blur-md" />
     </div>
 
     <div className="relative z-10 py-24 px-4 min-h-screen flex flex-col items-center">

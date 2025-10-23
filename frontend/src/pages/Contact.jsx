@@ -65,7 +65,7 @@ const Contact = () => {
         }}
         aria-hidden="true"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0057FF]/50 via-white/90 to-cyan-200/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0057FF]/50 via-white/90 to-cyan-200/60 backdrop-blur-md" />
       </div>
 
       {/* Main glassmorphism container */}

@@ -4,6 +4,10 @@ import { motion } from "framer-motion";
 import portfolioItems from "../data/portfolio";
 
 const heroImages = [
+  "/images/bgw4.jpg",
+  "/images/bgw3.jpg",
+  "/images/bgw2.jpg",
+  "/images/bgw.png",
   "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80",
   "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80",
   "/images/bg1.jpg",
@@ -95,11 +99,11 @@ const Home = () => {
       <div
         className="fixed inset-0 z-0 bg-cover bg-center"
         style={{
-          backgroundImage: "url('/images/bg.jpg')", // Use your preferred image
+          backgroundImage: "url('/images/bgw2jpg')", // Use your preferred image
         }}
         aria-hidden="true"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FFFFFF]/40 via-white/70 to-cyan-100/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FFFFFF]/40 via-white/70 to-white-100/60" />
       </div>
 
       {/* Main content with glassmorphism sections */}
@@ -114,7 +118,7 @@ const Home = () => {
               className="w-full h-full object-cover object-center transition-all duration-500"
               style={{ borderBottom: "none" }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/80 to-white/20 backdrop-blur-sm pointer-events-none" style={{ borderBottom: "none" }} />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/80 to-white/20 backdro-blur-sm pointer-events-none" style={{ borderBottom: "none" }} />
           </div>
           {/* Navigation dots */}
           <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 flex gap-3">
@@ -187,14 +191,14 @@ const Home = () => {
             preserveAspectRatio="none"
           >
             <path
-              fill="#0099FF"
+              fill="#ffffff"
               d="M0,0 C480,150 960,150 1440,0 L1440,150 L0,150 Z"
             />
           </svg>
         </section>
 
         {/* Our Core Services */}
-        <section className="py-20 px-6 bg-blue-200/30 backdrop-blur-sm relative overflow-hidden">
+        <section className="py-20 px-6 bg-white-200/30 backdrop-blur-md relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none z-0">
             <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/10 rounded-full blur-3xl opacity-30" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl opacity-30" />
@@ -250,7 +254,7 @@ const Home = () => {
         </section>
 
         {/* Portfolio Carousel */}
-        <section className="py-20 px-6 bg-white/20 backdrop-blur- relative overflow-hidden">
+        <section className="py-20 px-6 bg-white/20 backdrop-blur-sm relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none z-0">
             <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/60 rounded-full blur-3xl opacity-30" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/60 rounded-full blur-3xl opacity-30" />
@@ -328,7 +332,7 @@ const Home = () => {
         </section>
 
         {/* Stats Section */}
-        <section className="py-5 px-6 bg-white/40 backdrop-blur-lg">
+        <section className="py-5 px-6 bg-cyan-200/20 backdrop-blur-lg">
           <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
               { value: "50+", label: "Projects" },
