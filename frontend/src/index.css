@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Force desktop layout on all screens */
+@media (max-width: 1024px) {
+  html {
+    zoom: 0.75; /* Adjust as needed (0.7–0.85) */
+  }
+}
