@@ -5,13 +5,8 @@ import portfolioItems from "../data/portfolio";
 
 const heroImages = [
   "/images/bgw4.jpg",
-  "/images/bgw3.jpg",
-  "/images/bgw2.jpg",
   "/images/bgw.png",
   "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80",
-  "/images/bg1.jpg",
-  "/images/bg.jpg",
 ];
 
 const services = [

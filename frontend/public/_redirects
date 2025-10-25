@@ -1,5 +1,5 @@
 # SPA fallback — ensures client-side routing works
-/*    /index.html    200
+/* /index.html 200
 
 # Optional: Netlify Functions (uncomment if you use functions)
 # /api/*    /.netlify/functions/:splat    200
