@@ -8,7 +8,7 @@ const navLinks = [
   { to: '/services', label: 'Services' },
   { to: '/portfolio', label: 'Portfolio' },
   { to: '/contact', label: 'Contact' },
-    { to: '/about', label: 'About' },
+  { to: '/about', label: 'About' },
 ];
 
 const Header = () => {
@@ -31,28 +31,28 @@ const Header = () => {
   }, [location]);
 
   return (
-    <header className={`sticky top-0 z-50 w-full transition-all duration-300 shadow-md ${
-      isScrolled 
-        ? 'bg-[#ffffff]/70 backdrop-blur-md shadow-lg' 
+    <header className={`sticky top-0 z-50 w-full transition-all duration-300 shadow-md ${isScrolled
+        ? 'bg-[#ffffff]/70 backdrop-blur-md shadow-lg'
         : 'bg-[#ffffff]/90 backdrop-blur-md'
-    }`}>
+      }`}>
       <div className="max-w-7xl mx-auto flex justify-between items-center p-4 md:px-6 lg:px-8">
         {/* Logo/Brand */}
         <Link
           to="/"
           className="flex items-center gap-3 font-extrabold text-2xl text-[#F5F5F7] hover:opacity-90 transition-opacity"
         >
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.05 }}
-            className="w-15 h-15 md:w-13 md:h-12 rounded-full  "
+            className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center overflow-hidden"
           >
-            <img 
-              src="/images/smartlogo2.png" 
+            <img
+              src="/images/smartlogo2.png"
               alt="SmartHub Logo"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </motion.div>
-          <motion.span 
+
+          <motion.span
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             className="hidden sm:inline text-transparent bg-clip-text bg-gradient-to-r from-black to-blue-300"
@@ -72,15 +72,14 @@ const Header = () => {
             >
               <Link
                 to={link.to}
-                className={`relative px-4 py-2 rounded-lg font-medium transition-all ${
-                  location.pathname === link.to
+                className={`relative px-4 py-2 rounded-lg font-medium transition-all ${location.pathname === link.to
                     ? 'text-white bg-[#5C85F2]/90'
                     : 'text-black/90 hover:text-black hover:bg-black/10'
-                }`}
+                  }`}
               >
                 {link.label}
                 {location.pathname === link.to && (
-                  <motion.span 
+                  <motion.span
                     layoutId="navUnderline"
                     className="absolute left-0 bottom-0 w-full h-0.5 bg-white"
                     transition={{ type: 'spring', bounce: 0.25, duration: 0.6 }}
@@ -92,7 +91,7 @@ const Header = () => {
         </nav>
 
         {/* CTA Button */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
@@ -107,7 +106,7 @@ const Header = () => {
         </motion.div>
 
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className="md:hidden p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle menu"
@@ -119,7 +118,7 @@ const Header = () => {
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -131,11 +130,10 @@ const Header = () => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`block px-4 py-3 rounded-lg font-medium transition ${
-                    location.pathname === link.to
+                  className={`block px-4 py-3 rounded-lg font-medium transition ${location.pathname === link.to
                       ? 'bg-white/20 text-white'
                       : 'text-white/90 hover:bg-white/10 hover:text-white'
-                  }`}
+                    }`}
                 >
                   {link.label}
                 </Link>
