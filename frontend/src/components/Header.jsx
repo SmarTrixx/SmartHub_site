@@ -32,10 +32,12 @@ const Header = () => {
 
   return (
     <header className={`sticky top-0 z-50 w-full transition-all duration-300 shadow-md ${isScrolled
-        ? 'bg-[#ffffff]/70 backdrop-blur-md shadow-lg'
-        : 'bg-[#ffffff]/90 backdrop-blur-md'
+      ? 'bg-white/80 backdrop-blur-md shadow-lg'
+      : 'bg-white/95 backdrop-blur-md'
       }`}>
-      <div className="max-w-7xl mx-auto flex justify-between items-center p-4 md:px-6 lg:px-8">
+
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-2 sm:py-3 md:px-6 lg:px-8">
+
         {/* Logo/Brand */}
         <Link
           to="/"
@@ -55,7 +57,8 @@ const Header = () => {
           <motion.span
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            className="hidden sm:inline text-transparent bg-clip-text bg-gradient-to-r from-black to-blue-300"
+            className="inline text-transparent bg-clip-text bg-gradient-to-r from-black to-blue-400 text-base sm:text-lg md:text-xl"
+
           >
             Sm@rtHub
           </motion.span>
@@ -73,8 +76,8 @@ const Header = () => {
               <Link
                 to={link.to}
                 className={`relative px-4 py-2 rounded-lg font-medium transition-all ${location.pathname === link.to
-                    ? 'text-white bg-[#5C85F2]/90'
-                    : 'text-black/90 hover:text-black hover:bg-black/10'
+                  ? 'text-white bg-[#5C85F2]/90'
+                  : 'text-black/90 hover:text-black hover:bg-black/10'
                   }`}
               >
                 {link.label}
@@ -107,7 +110,8 @@ const Header = () => {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+          className="md:hidden p-2 rounded-lg text-black hover:bg-black/10 transition-colors"
+
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -131,8 +135,8 @@ const Header = () => {
                   key={link.to}
                   to={link.to}
                   className={`block px-4 py-3 rounded-lg font-medium transition ${location.pathname === link.to
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/90 hover:bg-white/10 hover:text-white'
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/90 hover:bg-white/10 hover:text-white'
                     }`}
                 >
                   {link.label}
