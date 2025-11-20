@@ -39,19 +39,19 @@ const Footer = () => {
   const socialLinks = [
     {
       icon: <FiMail className="text-xl" />,
-      url: "mailto:contact@smarthub.com",
+      url: "mailto:yuzuphbahbahtundey007@gmail.com",
       label: "Email",
       color: "bg-rose-100 text-rose-600"
     },
     {
       icon: <FiGithub className="text-xl" />,
-      url: "https://github.com/smarthub",
+      url: "https://github.com/SmarTrixx",
       label: "GitHub",
       color: "bg-gray-100 text-gray-800"
     },
     {
       icon: <FiLinkedin className="text-xl" />,
-      url: "https://linkedin.com/company/smarthub",
+      url: "https://www.linkedin.com/in/tunde-yusuf-40408a194",
       label: "LinkedIn",
       color: "bg-blue-100 text-blue-600"
     },

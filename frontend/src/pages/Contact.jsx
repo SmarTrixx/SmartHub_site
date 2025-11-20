@@ -190,8 +190,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Email</h3>
-                    <p className="text-gray-600">contact@example.com</p>
-                    <p className="text-gray-600">support@example.com</p>
+                    <p className="text-gray-600">smarthubz@gmail.com</p>
+                    <p className="text-gray-600">support.smarthubz@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-start">
@@ -200,7 +200,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Phone</h3>
-                    <p className="text-gray-600">+1 (555) 123-4567</p>
+                    <p className="text-gray-600">(+234) 903 922 3824</p>
                     <p className="text-gray-600">Mon-Fri, 9am-5pm</p>
                   </div>
                 </div>
@@ -211,7 +211,7 @@ const Contact = () => {
                   <div>
                     <h3 className="font-medium text-gray-900">Office</h3>
                     <p className="text-gray-600">123 Business Ave</p>
-                    <p className="text-gray-600">San Francisco, CA 94107</p>
+                    <p className="text-gray-600">Nigeria, CA 94107</p>
                   </div>
                 </div>
               </div>
