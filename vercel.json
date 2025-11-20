@@ -1,9 +1,12 @@
 {
-  "buildCommand": "cd frontend && npm ci && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "frontend/build",
+  "env": {
+    "REACT_APP_ENV": "production"
+  },
   "rewrites": [
     {
-      "source": "/((?!.*\\.).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
