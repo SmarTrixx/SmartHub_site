@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import portfolioItems from '../data/portfolio';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiArrowRight, FiDownload, FiExternalLink, FiCheckCircle, FiTwitter, FiFacebook, FiInstagram, FiLinkedin } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheckCircle, FiTwitter, FiFacebook, FiLinkedin, FiX } from 'react-icons/fi';
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -13,6 +13,9 @@ const ProjectDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Ensure scroll is enabled when component mounts
+    document.body.style.overflow = 'auto';
+
     // Find the project by ID
     const foundProject = portfolioItems.find(item => item.id === projectId);
     
@@ -31,6 +34,11 @@ const ProjectDetail = () => {
       // Redirect to portfolio if project not found
       navigate('/portfolio', { replace: true });
     }
+
+    // Cleanup to ensure scroll is enabled
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, [projectId, navigate]);
 
   const handlePrevImage = () => {
@@ -146,11 +154,11 @@ const ProjectDetail = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-12"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-xl mb-4">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl mb-4 bg-gray-100">
               <img
                 src={project.images[currentImageIndex]}
-                alt={`${project.title} - Image ${currentImageIndex + 1}`}
-                className="w-full h-96 md:h-[500px] object-cover"
+                alt={project.title}
+                className="w-full h-auto object-contain"
               />
               
               {project.images.length > 1 && (
