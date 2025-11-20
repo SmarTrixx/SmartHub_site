@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import portfolioItems from '../data/portfolio';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiArrowRight, FiCheckCircle, FiTwitter, FiFacebook, FiLinkedin, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheckCircle, FiTwitter, FiFacebook, FiLinkedin } from 'react-icons/fi';
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
