@@ -1,13 +1,12 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "frontend/build",
-  "env": {
-    "REACT_APP_ENV": "production"
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "build" }
     }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
