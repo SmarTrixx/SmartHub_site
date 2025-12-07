@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import portfolioItems from "../data/portfolio";
+import axios from "axios";
 
 const heroImages = [
   "/images/bgw4.jpg",
@@ -9,7 +10,7 @@ const heroImages = [
   "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80",
 ];
 
-const services = [
+const defaultServices = [
   {
     icon: "💻",
     title: "Software Development",
@@ -34,6 +35,10 @@ const Home = () => {
   const [portfolioIdx, setPortfolioIdx] = useState(0);
   const [typedBrand, setTypedBrand] = useState("");
   const [brandIdx, setBrandIdx] = useState(0);
+  const [services, setServices] = useState(defaultServices);
+  const [projects, setProjects] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let i = 0;
@@ -74,19 +79,58 @@ const Home = () => {
     // eslint-disable-next-line
   }, [brandIdx]);
 
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+        
+        // Fetch services
+        const servicesRes = await axios.get(`${apiUrl}/services`);
+        if (servicesRes.data.services && servicesRes.data.services.length > 0) {
+          setServices(servicesRes.data.services);
+        }
+
+        // Fetch projects
+        const projectsRes = await axios.get(`${apiUrl}/projects?limit=10`);
+        if (projectsRes.data.projects && projectsRes.data.projects.length > 0) {
+          setProjects(projectsRes.data.projects);
+        }
+
+        // Fetch profile for stats
+        const profileRes = await axios.get(`${apiUrl}/profile`);
+        if (profileRes.data && profileRes.data.stats) {
+          setStats(profileRes.data.stats);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        // Use default services if API fails
+        setServices(defaultServices);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const nextHero = () => setHeroIdx((i) => (i + 1) % heroImages.length);
   const prevHero = () => setHeroIdx((i) => (i - 1 + heroImages.length) % heroImages.length);
+
+  // Use API projects or fall back to static data
+  const displayedProjects = projects.length > 0 ? projects : portfolioItems;
 
   // Portfolio carousel logic
   const getPortfolioIndices = () => {
     const indices = [];
     for (let i = -1; i <= 1; i++) {
-      indices.push((portfolioIdx + i + portfolioItems.length) % portfolioItems.length);
+      indices.push((portfolioIdx + i + displayedProjects.length) % displayedProjects.length);
     }
     return indices;
   };
-  const nextPortfolio = () => setPortfolioIdx((i) => (i + 1) % portfolioItems.length);
-  const prevPortfolio = () => setPortfolioIdx((i) => (i - 1 + portfolioItems.length) % portfolioItems.length);
+  const nextPortfolio = () => setPortfolioIdx((i) => (i + 1) % displayedProjects.length);
+  const prevPortfolio = () => setPortfolioIdx((i) => (i - 1 + displayedProjects.length) % displayedProjects.length);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -271,8 +315,14 @@ const Home = () => {
               </button>
               <div className="flex items-center gap-4 w-full justify-center">
                 {getPortfolioIndices().map((idx, pos) => {
-                  const item = portfolioItems[idx];
+                  const item = displayedProjects[idx];
                   const isCenter = pos === 1;
+                  
+                  // Handle both API projects and static portfolio items
+                  const imageUrl = item.images ? 
+                    (Array.isArray(item.images) && item.images.length > 0 ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/../${item.images[0]}` : item.image)
+                    : item.image;
+                  
                   return (
                     <motion.div
                       key={idx}
@@ -293,15 +343,18 @@ const Home = () => {
                       }}
                     >
                       <img
-                        src={item.image}
+                        src={imageUrl}
                         alt={item.title}
                         className={`object-cover w-full h-2/3 transition-all`}
+                        onError={(e) => {
+                          e.target.src = "/images/placeholder.jpg";
+                        }}
                       />
                       <div className={`p-4 md:p-6 flex-1 flex flex-col justify-center items-center ${isCenter ? "" : "hidden md:flex"}`}>
                         <h4 className="font-bold text-lg md:text-xl mb-2 text-[#0057FF] text-center" style={{ fontFamily: "'Montserrat', 'Poppins', sans-serif" }}>
                           {item.title}
                         </h4>
-                        <p className="text-base text-gray-700 text-center">{item.desc}</p>
+                        <p className="text-base text-gray-700 text-center">{item.desc || item.description}</p>
                       </div>
                     </motion.div>
                   );
@@ -330,9 +383,9 @@ const Home = () => {
         <section className="py-5 px-6 bg-cyan-200/20 backdrop-blur-lg">
           <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: "50+", label: "Projects" },
-              { value: "30+", label: "Clients" },
-              { value: "5+", label: "Years" },
+              { value: stats?.projectsCompleted || "50+", label: "Projects" },
+              { value: stats?.clientsSatisfied || "30+", label: "Clients" },
+              { value: stats?.yearsExperience || "5+", label: "Years" },
               { value: "100%", label: "Satisfaction" },
             ].map((stat, idx) => (
               <div
