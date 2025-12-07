@@ -279,7 +279,7 @@ const Home = () => {
                       initial={{ opacity: 0, y: 30 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.4 }}
+                      transition={{ duration: 0.1 }}
                       className={`
                         flex-shrink-0 bg-white/40 backdrop-blur-lg border border-white/30 shadow-xl transition-all duration-300 hover:shadow-2xl
                         ${isCenter

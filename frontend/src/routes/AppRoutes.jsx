@@ -7,9 +7,14 @@ import Contact from '../pages/Contact';
 import About from '../pages/About';
 import Privacy from '../pages/Privacy';
 import Terms from '../pages/Terms';
+import AdminLogin from '../pages/AdminLogin';
+import AdminProjects from '../pages/AdminProjects';
+import AdminProfile from '../pages/AdminProfile';
+import AdminServices from '../pages/AdminServices';
 
 const AppRoutes = () => (
   <Routes>
+    {/* Public Routes */}
     <Route path="/" element={<Home />} />
     <Route path="/services" element={<Services />} />
     <Route path="/portfolio" element={<Portfolio />} />
@@ -18,7 +23,12 @@ const AppRoutes = () => (
     <Route path="/about" element={<About />} />
     <Route path="/privacy" element={<Privacy />} />
     <Route path="/terms" element={<Terms />} />
-    {/* Add more routes as needed */}
+
+    {/* Admin Routes */}
+    <Route path="/admin/login" element={<AdminLogin />} />
+    <Route path="/admin/projects" element={<AdminProjects />} />
+    <Route path="/admin/profile" element={<AdminProfile />} />
+    <Route path="/admin/services" element={<AdminServices />} />
   </Routes>
 );
 
