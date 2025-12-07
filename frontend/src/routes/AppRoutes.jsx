@@ -8,6 +8,7 @@ import About from '../pages/About';
 import Privacy from '../pages/Privacy';
 import Terms from '../pages/Terms';
 import AdminLogin from '../pages/AdminLogin';
+import AdminDashboardHome from '../pages/AdminDashboardHome';
 import AdminProjects from '../pages/AdminProjects';
 import AdminProfile from '../pages/AdminProfile';
 import AdminServices from '../pages/AdminServices';
@@ -26,6 +27,7 @@ const AppRoutes = () => (
 
     {/* Admin Routes */}
     <Route path="/admin/login" element={<AdminLogin />} />
+    <Route path="/admin/dashboard" element={<AdminDashboardHome />} />
     <Route path="/admin/projects" element={<AdminProjects />} />
     <Route path="/admin/profile" element={<AdminProfile />} />
     <Route path="/admin/services" element={<AdminServices />} />
