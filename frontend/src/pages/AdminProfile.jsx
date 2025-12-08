@@ -117,22 +117,35 @@ const AdminProfile = () => {
       const newIndex = teamMembers.length;
       setTeamMembers([...teamMembers, newTeamMember]);
       
-      // Store file reference if one was selected
-      if (teamAvatarFiles[newIndex]) {
-        // File will be preserved in teamAvatarFiles
+      // Move file from 'temp' key to actual index if one was selected
+      if (teamAvatarFiles['temp']) {
+        setTeamAvatarFiles(prev => {
+          const newFiles = { ...prev };
+          newFiles[newIndex] = newFiles['temp'];
+          delete newFiles['temp'];
+          return newFiles;
+        });
+        setTeamAvatarPreviews(prev => {
+          const newPreviews = { ...prev };
+          newPreviews[newIndex] = newPreviews['temp'];
+          delete newPreviews['temp'];
+          return newPreviews;
+        });
+      } else {
+        // Clear temp keys if no file was selected
+        setTeamAvatarFiles(prev => {
+          const newFiles = { ...prev };
+          delete newFiles['temp'];
+          return newFiles;
+        });
+        setTeamAvatarPreviews(prev => {
+          const newPreviews = { ...prev };
+          delete newPreviews['temp'];
+          return newPreviews;
+        });
       }
       
       setNewTeamMember({ name: '', role: '', avatar: '', bio: '' });
-      setTeamAvatarFiles(prev => {
-        const newFiles = { ...prev };
-        delete newFiles[newIndex];
-        return newFiles;
-      });
-      setTeamAvatarPreviews(prev => {
-        const newPreviews = { ...prev };
-        delete newPreviews[newIndex];
-        return newPreviews;
-      });
     }
   };
 
