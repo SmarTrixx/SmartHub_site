@@ -63,7 +63,9 @@ const ProjectDetail = () => {
         } else {
           // Redirect to portfolio if project not found
           console.log('Project not found in API or static data:', projectId);
-          navigate('/portfolio', { replace: true });
+          setTimeout(() => {
+            navigate('/portfolio', { replace: true });
+          }, 100);
         }
       }
     };
@@ -74,7 +76,7 @@ const ProjectDetail = () => {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [projectId, navigate]);
+  }, [projectId]);
 
   const handlePrevImage = () => {
     if (project && project.images) {
