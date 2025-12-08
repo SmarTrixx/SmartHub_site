@@ -167,9 +167,19 @@ const About = () => {
               className="bg-white/60 backdrop-blur-lg rounded-[3rem] shadow-lg p-6 flex flex-col items-center w-72 border border-white/30"
             >
               <img
-                src={member.avatar}
+                src={(() => {
+                  let imageUrl = member.avatar;
+                  if (imageUrl && imageUrl.startsWith('/uploads/')) {
+                    const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                    imageUrl = `${baseUrl}${imageUrl}`;
+                  }
+                  return imageUrl || '/images/portfolio4.png';
+                })()}
                 alt={member.name}
                 className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-[#0057FF]/20 shadow"
+                onError={(e) => {
+                  e.target.src = '/images/portfolio4.png';
+                }}
               />
               <h3 className="font-bold text-xl text-[#22223B] mb-1">
                 {member.name}
