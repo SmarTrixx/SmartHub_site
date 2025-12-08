@@ -406,10 +406,16 @@ const Portfolio = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        console.log('[Portfolio Button] Clicked - item:', selectedItem.id);
                         const targetPath = selectedItem.link || `/portfolio/${selectedItem.id}`;
-                        console.log('Navigating to:', targetPath);
-                        closeModal();
+                        console.log('[Portfolio Button] Target:', targetPath);
+                        
+                        // Navigate first, then close modal
                         navigate(targetPath);
+                        // Add a small delay before closing to ensure navigation starts
+                        setTimeout(() => {
+                          closeModal();
+                        }, 50);
                       }}
                       className="inline-flex items-center px-6 py-3 bg-[#0057FF] text-white rounded-full font-medium hover:bg-[#0047D4] transition-colors cursor-pointer"
                     >
