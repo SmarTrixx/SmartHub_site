@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import portfolioItems from '../data/portfolio';
 import { motion } from 'framer-motion';
@@ -17,66 +17,62 @@ const ProjectDetail = () => {
     // Ensure scroll is enabled when component mounts
     document.body.style.overflow = 'auto';
 
-    const fetchProject = async () => {
+    const loadProject = async () => {
+      console.log(`[ProjectDetail] Loading project: ${projectId}`);
+      
       try {
         const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-        console.log('Fetching project from API:', `${apiUrl}/projects/${projectId}`);
-        const response = await axios.get(`${apiUrl}/projects/${projectId}`);
-        const apiProject = response.data;
+        const url = `${apiUrl}/projects/${projectId}`;
+        console.log(`[ProjectDetail] API URL: ${url}`);
         
-        console.log('Project fetched successfully:', apiProject.id);
-        setProject(apiProject);
+        const response = await axios.get(url);
+        console.log(`[ProjectDetail] ✓ Success:`, response.data.id);
+        setProject(response.data);
         
-        // Find related projects from API
+        // Fetch related projects
         try {
-          const projectsResponse = await axios.get(`${apiUrl}/projects?limit=100`);
-          const allProjects = projectsResponse.data.projects || [];
-          const related = allProjects.filter(item => 
-            item.id !== apiProject.id && 
-            item.tags && apiProject.tags &&
-            item.tags.some(tag => apiProject.tags.includes(tag))
+          const allRes = await axios.get(`${apiUrl}/projects?limit=100`);
+          const all = allRes.data.projects || [];
+          const related = all.filter(item => 
+            item.id !== response.data.id && 
+            item.tags && response.data.tags &&
+            item.tags.some(tag => response.data.tags.includes(tag))
           ).slice(0, 3);
           setRelatedProjects(related);
-        } catch (err) {
-          console.error('Error fetching related projects:', err);
+        } catch (e) {
+          console.error('Related projects error:', e);
           setRelatedProjects([]);
         }
         
         setIsLoading(false);
-      } catch (apiError) {
-        // Fallback to static portfolio data
-        console.log('API fetch failed, trying static data fallback. Error:', apiError.message);
-        const foundProject = portfolioItems.find(item => item.id === projectId);
+      } catch (err) {
+        console.log(`[ProjectDetail] ✗ API Error:`, err.response?.status, err.message);
         
-        if (foundProject) {
-          console.log('Found project in static data:', foundProject.id);
-          setProject(foundProject);
-          
-          // Find related projects (same tags, excluding current project)
-          const related = portfolioItems.filter(item => 
-            item.id !== foundProject.id && 
-            item.tags.some(tag => foundProject.tags.includes(tag))
+        // Try static data
+        const staticProject = portfolioItems.find(p => p.id === projectId);
+        if (staticProject) {
+          console.log(`[ProjectDetail] ✓ Found in static data`);
+          setProject(staticProject);
+          const related = portfolioItems.filter(p => 
+            p.id !== staticProject.id && 
+            p.tags.some(tag => staticProject.tags.includes(tag))
           ).slice(0, 3);
-          
           setRelatedProjects(related);
           setIsLoading(false);
         } else {
-          // Redirect to portfolio if project not found
-          console.log('Project not found in API or static data:', projectId);
-          setTimeout(() => {
-            navigate('/portfolio', { replace: true });
-          }, 100);
+          console.log(`[ProjectDetail] ✗ Not found - redirecting to portfolio`);
+          setIsLoading(false);
+          navigate('/portfolio', { replace: true });
         }
       }
     };
 
-    fetchProject();
+    loadProject();
 
-    // Cleanup to ensure scroll is enabled
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [projectId]);
+  }, [projectId, navigate]);
 
   const handlePrevImage = () => {
     if (project && project.images) {
