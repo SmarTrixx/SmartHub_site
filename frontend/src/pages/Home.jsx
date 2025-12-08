@@ -389,9 +389,9 @@ const Home = () => {
         <section className="py-5 px-6 bg-cyan-200/20 backdrop-blur-lg">
           <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: stats?.projectsCompleted || "50+", label: "Projects" },
-              { value: stats?.clientsSatisfied || "30+", label: "Clients" },
-              { value: stats?.yearsExperience || "5+", label: "Years" },
+              { value: stats?.projectsCompleted + "+" || "50+", label: "Projects" },
+              { value: stats?.clientsSatisfied  + "+" || "30+", label: "Clients" },
+              { value: stats?.yearsExperience   + "+"|| "5+", label: "Years" },
               { value: "100%", label: "Satisfaction" },
             ].map((stat, idx) => (
               <div

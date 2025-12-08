@@ -11,6 +11,7 @@ const AdminProfile = () => {
   const [avatar, setAvatar] = useState(null);
   const [teamMembers, setTeamMembers] = useState([]);
   const [teamAvatarFile, setTeamAvatarFile] = useState(null);
+  const [teamAvatarPreview, setTeamAvatarPreview] = useState(null);
   const [newTeamMember, setNewTeamMember] = useState({
     name: '',
     role: '',
@@ -115,6 +116,8 @@ const AdminProfile = () => {
     if (newTeamMember.name && newTeamMember.role) {
       setTeamMembers([...teamMembers, newTeamMember]);
       setNewTeamMember({ name: '', role: '', avatar: '', bio: '' });
+      setTeamAvatarFile(null);
+      setTeamAvatarPreview(null);
     }
   };
 
@@ -147,6 +150,11 @@ const AdminProfile = () => {
 
       // Append team
       formDataObj.append('team', JSON.stringify(teamMembers));
+
+      // Append team avatar if provided
+      if (teamAvatarFile) {
+        formDataObj.append('teamAvatar', teamAvatarFile);
+      }
 
       // Append avatar if provided
       if (avatar) {
@@ -474,32 +482,27 @@ const AdminProfile = () => {
                       if (e.target.files?.[0]) {
                         setTeamAvatarFile(e.target.files[0]);
                         // Create preview URL
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setNewTeamMember(prev => ({
-                            ...prev,
-                            avatar: reader.result
-                          }));
-                        };
-                        reader.readAsDataURL(e.target.files[0]);
+                        const previewUrl = URL.createObjectURL(e.target.files[0]);
+                        setTeamAvatarPreview(previewUrl);
                       }
                     }}
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                   />
                   <p className="text-xs text-gray-500 mt-1">Or enter Avatar URL below if not uploading image</p>
                 </div>
-                {newTeamMember.avatar && typeof newTeamMember.avatar === 'string' && newTeamMember.avatar.startsWith('data:') && (
+                {teamAvatarPreview && (
                   <div className="md:col-span-2">
-                    <img src={newTeamMember.avatar} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
+                    <img src={teamAvatarPreview} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
                   </div>
                 )}
                 <input
                   type="url"
                   name="avatar"
-                  value={typeof newTeamMember.avatar === 'string' && newTeamMember.avatar.startsWith('data:') ? '' : newTeamMember.avatar}
+                  value={teamAvatarFile ? '' : newTeamMember.avatar}
                   onChange={handleTeamMemberChange}
                   placeholder="Avatar URL (alternative to image upload)"
-                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  disabled={teamAvatarFile ? true : false}
+                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF] disabled:bg-gray-100"
                 />
                 <textarea
                   name="bio"

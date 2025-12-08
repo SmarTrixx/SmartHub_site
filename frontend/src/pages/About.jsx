@@ -43,9 +43,9 @@ const About = () => {
           // Update stats
           if (response.data.stats) {
             setStats([
-              { value: response.data.stats.projectsCompleted || "50+", label: "Projects Delivered" },
-              { value: response.data.stats.clientsSatisfied || "30+", label: "Happy Clients" },
-              { value: response.data.stats.yearsExperience || "5+", label: "Years Experience" },
+              { value: response.data.stats.projectsCompleted + "+" || "50+", label: "Projects Delivered" },
+              { value: response.data.stats.clientsSatisfied + "+" || "30+", label: "Happy Clients" },
+              { value: response.data.stats.yearsExperience + "+" || "5+", label: "Years Experience" },
               { value: "100%", label: "Satisfaction" },
             ]);
           }
