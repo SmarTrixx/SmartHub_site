@@ -1,46 +1,82 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import portfolioItems from "../data/portfolio";
 import { FiArrowRight, FiSearch, FiX, FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 
 const Portfolio = () => {
-  const [filteredItems, setFilteredItems] = useState(portfolioItems);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [allItems, setAllItems] = useState(portfolioItems);
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
+
+  // Fetch projects from API
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true);
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+        const response = await axios.get(`${apiUrl}/projects?limit=100`);
+        
+        if (response.data.projects && response.data.projects.length > 0) {
+          setAllItems(response.data.projects);
+        } else {
+          setAllItems(portfolioItems);
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        // Fallback to static data
+        setAllItems(portfolioItems);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  // Fetch profile for About Me section
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+        const response = await axios.get(`${apiUrl}/profile`);
+        setProfile(response.data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   // Extract all unique tags for filtering
-  const allTags = ['All', ...new Set(portfolioItems.flatMap(item => item.tags))];
+  const allTags = ['All', ...new Set(allItems.flatMap(item => item.tags || []))];
 
   // Filter items based on active filter and search term
   useEffect(() => {
-    setIsLoading(true);
-
-    let filtered = [...portfolioItems];
+    let filtered = [...allItems];
 
     if (activeFilter !== 'All') {
-      filtered = filtered.filter(item => item.tags.includes(activeFilter));
+      filtered = filtered.filter(item => (item.tags || []).includes(activeFilter));
     }
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(item =>
-        item.title.toLowerCase().includes(term) ||
-        item.desc.toLowerCase().includes(term) ||
-        item.tags.some(tag => tag.toLowerCase().includes(term))
+        (item.title || '').toLowerCase().includes(term) ||
+        (item.desc || '').toLowerCase().includes(term) ||
+        (item.tags || []).some(tag => tag.toLowerCase().includes(term))
       );
     }
 
-    // Simulate loading delay for better UX
-    const timer = setTimeout(() => {
-      setFilteredItems(filtered);
-      setIsLoading(false);
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [activeFilter, searchTerm]);
+    setFilteredItems(filtered);
+  }, [activeFilter, searchTerm, allItems]);
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -160,12 +196,29 @@ const Portfolio = () => {
                 className="group bg-white rounded-[3rem] shadow-md hover:shadow-xl border border-gray-200 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className="relative overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
+                    {(() => {
+                      let imageUrl = item.image || '/images/placeholder.jpg';
+                      if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+                        imageUrl = item.images[0];
+                      }
+                      // Ensure full URL for API images
+                      if (imageUrl.startsWith('/uploads/')) {
+                        // Extract base URL without /api suffix
+                        const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                        imageUrl = `${baseUrl}${imageUrl}`;
+                      }
+                      return (
+                        <img
+                          src={imageUrl}
+                          alt={item.title}
+                          className="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.src = '/images/placeholder.jpg';
+                          }}
+                        />
+                      );
+                    })()}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0088ff]/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     {/* <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                       {item.tags.map((tag, idx) => (
@@ -179,9 +232,9 @@ const Portfolio = () => {
                     </div> */}
                     <button
                       onClick={() => handleItemClick(item)}
-                      className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+                      className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer"
                     >
-                      <span className="bg-white text-[#0057FF] px-6 py-2 rounded-full font-medium shadow-lg">
+                      <span className="bg-white text-[#0057FF] px-6 py-2 rounded-full font-medium shadow-lg hover:shadow-xl transition-shadow">
                         Quick View
                       </span>
                     </button>
@@ -234,28 +287,41 @@ const Portfolio = () => {
           <section className="mt-24">
             <div className="max-w-5xl mx-auto px-6 py-12 bg-gradient-to-br from-[#ffffFF]/30 to-cyan-100 rounded-[3rem] shadow-2xl border border-[#0057FF]/10">
               <div className="flex flex-col md:flex-row items-center gap-8">
-                <img
-                  src="/images/portfolio4.png" // Replace with your avatar
-                  alt="Yusuf Tunde"
-                  className="w-40 h-40 rounded-full border-4 border-[#0057FF] shadow-lg object-cover"
-                />
+                {(() => {
+                  let avatarUrl = profile?.avatar || "/images/portfolio4.png";
+                  // Add API URL prefix for uploaded images
+                  if (avatarUrl.startsWith('/uploads/')) {
+                    const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                    avatarUrl = `${baseUrl}${avatarUrl}`;
+                  }
+                  return (
+                    <img
+                      src={avatarUrl}
+                      alt={profile?.name || "Yusuf Tunde"}
+                      className="w-40 h-40 rounded-full border-4 border-[#0057FF] shadow-lg object-cover"
+                      onError={(e) => {
+                        e.target.src = '/images/portfolio4.png';
+                      }}
+                    />
+                  );
+                })()}
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-3xl font-extrabold text-[#0057FF] mb-2">Yusuf Tunde</h3>
-                  <p className="text-lg font-semibold text-gray-700 mb-1">Full Stack Developer & Designer</p>
+                  <h3 className="text-3xl font-extrabold text-[#0057FF] mb-2">{profile?.name || 'Yusuf Tunde'}</h3>
+                  <p className="text-lg font-semibold text-gray-700 mb-1">{profile?.title || 'Full Stack Developer & Designer'}</p>
                   <p className="text-gray-600 mb-4">
-                    I’m passionate about building creative solutions for real-world problems.<br />
-                    Let’s connect and collaborate!
+                    {profile?.bio || "I'm passionate about building creative solutions for real-world problems."}<br />
+                    Let's connect and collaborate!
                   </p>
                   <div className="flex justify-center md:justify-start gap-4 mt-2">
-                    <a href="mailto:your@email.com" target="_blank" rel="noopener noreferrer"
+                    <a href={profile?.email ? `mailto:${profile.email}` : "mailto:your@email.com"} target="_blank" rel="noopener noreferrer"
                       className="bg-white rounded-full p-3 shadow hover:bg-[#0057FF]/10 transition-colors">
                       <FiMail className="text-[#0057FF] text-2xl" />
                     </a>
-                    <a href="https://github.com/your-github-id" target="_blank" rel="noopener noreferrer"
+                    <a href={profile?.socialLinks?.github || "https://github.com/your-github-id"} target="_blank" rel="noopener noreferrer"
                       className="bg-white rounded-full p-3 shadow hover:bg-[#0057FF]/10 transition-colors">
                       <FiGithub className="text-[#0057FF] text-2xl" />
                     </a>
-                    <a href="https://linkedin.com/in/your-linkedin-id" target="_blank" rel="noopener noreferrer"
+                    <a href={profile?.socialLinks?.linkedin || "https://linkedin.com/in/your-linkedin-id"} target="_blank" rel="noopener noreferrer"
                       className="bg-white rounded-full p-3 shadow hover:bg-[#0057FF]/10 transition-colors">
                       <FiLinkedin className="text-[#0057FF] text-2xl" />
                     </a>
@@ -295,9 +361,19 @@ const Portfolio = () => {
                 <div className="grid md:grid-cols-2 gap-8 mb-8">
                   <div className="rounded-xl overflow-hidden">
                     <img
-                      src={selectedItem.image}
+                      src={(() => {
+                        let imageUrl = selectedItem.image || '/images/placeholder.jpg';
+                        if (imageUrl.startsWith('/uploads/')) {
+                          const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                          imageUrl = `${baseUrl}${imageUrl}`;
+                        }
+                        return imageUrl;
+                      })()}
                       alt={selectedItem.title}
                       className="w-full h-auto object-cover"
+                      onError={(e) => {
+                        e.target.src = '/images/placeholder.jpg';
+                      }}
                     />
                   </div>
                   <div>
@@ -327,13 +403,19 @@ const Portfolio = () => {
                       </div>
                     )}
 
-                    <Link
-                      to={selectedItem.link}
-                      className="inline-flex items-center px-6 py-3 bg-[#0057FF] text-white rounded-full font-medium hover:bg-[#0047D4] transition-colors"
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const targetPath = selectedItem.link || `/portfolio/${selectedItem.id}`;
+                        console.log('Navigating to:', targetPath);
+                        closeModal();
+                        navigate(targetPath);
+                      }}
+                      className="inline-flex items-center px-6 py-3 bg-[#0057FF] text-white rounded-full font-medium hover:bg-[#0047D4] transition-colors cursor-pointer"
                     >
                       View Full Project
                       <FiArrowRight className="ml-2" />
-                    </Link>
+                    </button>
                   </div>
                 </div>
 

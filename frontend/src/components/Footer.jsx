@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 import { 
   FiGithub, 
   FiLinkedin, 
@@ -20,23 +21,7 @@ const navLinks = [
 const Footer = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [currentYear] = useState(new Date().getFullYear());
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollButton(window.scrollY > 300);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
-  const socialLinks = [
+  const [socialLinks, setSocialLinks] = useState([
     {
       icon: <FiMail className="text-xl" />,
       url: "mailto:yuzuphbahbahtundey007@gmail.com",
@@ -67,7 +52,83 @@ const Footer = () => {
       label: "Instagram",
       color: "bg-pink-100 text-pink-600"
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollButton(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fetch social links from API
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+        const response = await axios.get(`${apiUrl}/profile`);
+        if (response.data) {
+          const links = response.data.socialLinks || {};
+          const updatedSocials = [];
+          
+          // Email - always show
+          updatedSocials.push({
+            icon: <FiMail className="text-xl" />,
+            url: `mailto:${response.data.email || 'hello@example.com'}`,
+            label: "Email",
+            color: "bg-rose-100 text-rose-600"
+          });
+          
+          // GitHub - use DB value or fallback
+          updatedSocials.push({
+            icon: <FiGithub className="text-xl" />,
+            url: links.github || "https://github.com/SmarTrixx",
+            label: "GitHub",
+            color: "bg-gray-100 text-gray-800"
+          });
+          
+          // LinkedIn - use DB value or fallback
+          updatedSocials.push({
+            icon: <FiLinkedin className="text-xl" />,
+            url: links.linkedin || "https://www.linkedin.com/in/tunde-yusuf-40408a194",
+            label: "LinkedIn",
+            color: "bg-blue-100 text-blue-600"
+          });
+          
+          // Twitter - use DB value or fallback
+          updatedSocials.push({
+            icon: <FiTwitter className="text-xl" />,
+            url: links.twitter || "https://twitter.com/smarthub",
+            label: "Twitter",
+            color: "bg-sky-100 text-sky-600"
+          });
+          
+          // Instagram - use DB value or fallback
+          updatedSocials.push({
+            icon: <FiInstagram className="text-xl" />,
+            url: links.instagram || "https://instagram.com/smarthub",
+            label: "Instagram",
+            color: "bg-pink-100 text-pink-600"
+          });
+          
+          setSocialLinks(updatedSocials);
+        }
+      } catch (error) {
+        console.error('Error fetching social links:', error);
+        // Keep default values on error
+      }
+    };
+
+    fetchSocialLinks();
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   const footerLinks = [
     { name: "Privacy Policy", url: "/privacy" },

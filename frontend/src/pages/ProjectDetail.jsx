@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import portfolioItems from '../data/portfolio';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiArrowRight, FiCheckCircle, FiTwitter, FiFacebook, FiLinkedin } from 'react-icons/fi';
+import axios from 'axios';
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -16,24 +17,58 @@ const ProjectDetail = () => {
     // Ensure scroll is enabled when component mounts
     document.body.style.overflow = 'auto';
 
-    // Find the project by ID
-    const foundProject = portfolioItems.find(item => item.id === projectId);
-    
-    if (foundProject) {
-      setProject(foundProject);
-      
-      // Find related projects (same tags, excluding current project)
-      const related = portfolioItems.filter(item => 
-        item.id !== foundProject.id && 
-        item.tags.some(tag => foundProject.tags.includes(tag))
-      ).slice(0, 3);
-      
-      setRelatedProjects(related);
-      setIsLoading(false);
-    } else {
-      // Redirect to portfolio if project not found
-      navigate('/portfolio', { replace: true });
-    }
+    const fetchProject = async () => {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+        console.log('Fetching project from API:', `${apiUrl}/projects/${projectId}`);
+        const response = await axios.get(`${apiUrl}/projects/${projectId}`);
+        const apiProject = response.data;
+        
+        console.log('Project fetched successfully:', apiProject.id);
+        setProject(apiProject);
+        
+        // Find related projects from API
+        try {
+          const projectsResponse = await axios.get(`${apiUrl}/projects?limit=100`);
+          const allProjects = projectsResponse.data.projects || [];
+          const related = allProjects.filter(item => 
+            item.id !== apiProject.id && 
+            item.tags && apiProject.tags &&
+            item.tags.some(tag => apiProject.tags.includes(tag))
+          ).slice(0, 3);
+          setRelatedProjects(related);
+        } catch (err) {
+          console.error('Error fetching related projects:', err);
+          setRelatedProjects([]);
+        }
+        
+        setIsLoading(false);
+      } catch (apiError) {
+        // Fallback to static portfolio data
+        console.log('API fetch failed, trying static data fallback. Error:', apiError.message);
+        const foundProject = portfolioItems.find(item => item.id === projectId);
+        
+        if (foundProject) {
+          console.log('Found project in static data:', foundProject.id);
+          setProject(foundProject);
+          
+          // Find related projects (same tags, excluding current project)
+          const related = portfolioItems.filter(item => 
+            item.id !== foundProject.id && 
+            item.tags.some(tag => foundProject.tags.includes(tag))
+          ).slice(0, 3);
+          
+          setRelatedProjects(related);
+          setIsLoading(false);
+        } else {
+          // Redirect to portfolio if project not found
+          console.log('Project not found in API or static data:', projectId);
+          navigate('/portfolio', { replace: true });
+        }
+      }
+    };
+
+    fetchProject();
 
     // Cleanup to ensure scroll is enabled
     return () => {
@@ -156,7 +191,14 @@ const ProjectDetail = () => {
           >
             <div className="relative rounded-2xl overflow-hidden shadow-xl mb-4 bg-gray-100">
               <img
-                src={project.images[currentImageIndex]}
+                src={(() => {
+                  let imageUrl = project.images[currentImageIndex];
+                  if (imageUrl.startsWith('/uploads/')) {
+                    const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                    imageUrl = `${baseUrl}${imageUrl}`;
+                  }
+                  return imageUrl;
+                })()}
                 alt={project.title}
                 className="w-full h-auto object-contain"
               />
@@ -303,7 +345,14 @@ const ProjectDetail = () => {
                     <Link to={`/portfolio/${relatedProject.id}`}>
                       <div className="relative rounded-2xl overflow-hidden mb-4 h-64 shadow-lg">
                         <img
-                          src={relatedProject.image}
+                          src={(() => {
+                            let imageUrl = relatedProject.image;
+                            if (imageUrl.startsWith('/uploads/')) {
+                              const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                              imageUrl = `${baseUrl}${imageUrl}`;
+                            }
+                            return imageUrl;
+                          })()}
                           alt={relatedProject.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />

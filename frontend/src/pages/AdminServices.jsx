@@ -27,7 +27,10 @@ const AdminServices = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/services`);
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/services`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setServices(response.data);
       setLoading(false);
     } catch (error) {

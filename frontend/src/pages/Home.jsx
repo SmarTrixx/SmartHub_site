@@ -38,7 +38,7 @@ const Home = () => {
   const [services, setServices] = useState(defaultServices);
   const [projects, setProjects] = useState([]);
   const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     let i = 0;
@@ -47,6 +47,7 @@ const Home = () => {
 
     const type = () => {
       setTypedBrand("");
+      i = 0; // Reset counter for each word
       interval = setInterval(() => {
         const currentWord = brandVariants[brandIdx];
         if (i < currentWord.length) {
@@ -76,7 +77,6 @@ const Home = () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-    // eslint-disable-next-line
   }, [brandIdx]);
 
   // Fetch data from API
@@ -319,9 +319,15 @@ const Home = () => {
                   const isCenter = pos === 1;
                   
                   // Handle both API projects and static portfolio items
-                  const imageUrl = item.images ? 
-                    (Array.isArray(item.images) && item.images.length > 0 ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/../${item.images[0]}` : item.image)
-                    : item.image;
+                  let imageUrl = item.image || '/images/placeholder.jpg';
+                  if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+                    imageUrl = item.images[0];
+                  }
+                  // Ensure full URL for API images
+                  if (imageUrl.startsWith('/uploads/')) {
+                    const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                    imageUrl = `${baseUrl}${imageUrl}`;
+                  }
                   
                   return (
                     <motion.div

@@ -414,9 +414,18 @@ const AdminProjects = () => {
                 <div className="flex items-center gap-4 flex-1">
                   {project.image && (
                     <img
-                      src={project.image}
+                      src={(() => {
+                        let imageUrl = project.image;
+                        if (imageUrl.startsWith('/uploads/')) {
+                          imageUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${imageUrl}`;
+                        }
+                        return imageUrl;
+                      })()}
                       alt={project.title}
                       className="w-16 h-16 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.src = '/images/placeholder.jpg';
+                      }}
                     />
                   )}
                   <div className="flex-1">

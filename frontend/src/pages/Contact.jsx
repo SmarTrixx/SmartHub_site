@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiSend, FiMapPin, FiPhone, FiMail, FiCheckCircle, FiTwitter, FiFacebook, FiInstagram, FiLinkedin } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -8,9 +9,52 @@ const Contact = () => {
     email: '',
     message: ''
   });
+  const [contactInfo, setContactInfo] = useState({
+    email: 'hello@example.com',
+    phone: '+234 903 922 3824',
+    location: 'Nigeria',
+    workAvailability: 'Available',
+    availableTime: 'Sat-Sun, 24hrs',
+    socialLinks: {
+      twitter: 'https://twitter.com',
+      facebook: 'https://facebook.com',
+      instagram: 'https://instagram.com',
+      linkedin: 'https://linkedin.com'
+    }
+  });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Fetch contact info from API
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+        const response = await axios.get(`${apiUrl}/profile`);
+        if (response.data) {
+          const links = response.data.socialLinks || {};
+          setContactInfo(prev => ({
+            email: response.data.email || prev.email,
+            phone: response.data.phone || prev.phone,
+            location: response.data.location || prev.location,
+            workAvailability: response.data.workAvailability || prev.workAvailability,
+            availableTime: response.data.availableTime || prev.availableTime,
+            socialLinks: {
+              twitter: links.twitter || "https://twitter.com",
+              facebook: links.facebook || "https://facebook.com",
+              instagram: links.instagram || "https://instagram.com",
+              linkedin: links.linkedin || "https://linkedin.com"
+            }
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching contact info:", error);
+      }
+    };
+
+    fetchContactInfo();
+  }, []);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -190,8 +234,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Email</h3>
-                    <p className="text-gray-600">smarthubz@gmail.com</p>
-                    <p className="text-gray-600">support.smarthubz@gmail.com</p>
+                    <p className="text-gray-600">{contactInfo.email}</p>
                   </div>
                 </div>
                 <div className="flex items-start">
@@ -200,8 +243,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Phone</h3>
-                    <p className="text-gray-600">(+234) 903 922 3824</p>
-                    <p className="text-gray-600">Mon-Fri, 9am-5pm</p>
+                    <p className="text-gray-600">{contactInfo.phone}</p>
+                    <p className="text-gray-600">{contactInfo.availableTime}</p>
                   </div>
                 </div>
                 <div className="flex items-start">
@@ -209,9 +252,8 @@ const Contact = () => {
                     <FiMapPin className="text-[#0057FF] text-xl" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Office</h3>
-                    <p className="text-gray-600">123 Business Ave</p>
-                    <p className="text-gray-600">Nigeria, CA 94107</p>
+                    <h3 className="font-medium text-gray-900">Location</h3>
+                    <p className="text-gray-600">{contactInfo.location}</p>
                   </div>
                 </div>
               </div>
@@ -223,22 +265,20 @@ const Contact = () => {
                 <FiSend className="text-[#0057FF]" /> Follow Us
               </h2>
               <div className="flex space-x-4">
-                <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="Twitter">
+                <a href={contactInfo.socialLinks?.twitter} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="Twitter">
                   <FiTwitter className="text-2xl" />
                 </a>
-                <a href="https://facebook.com/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="Facebook">
+                <a href={contactInfo.socialLinks?.facebook} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="Facebook">
                   <FiFacebook className="text-2xl" />
                 </a>
-                <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="Instagram">
+                <a href={contactInfo.socialLinks?.instagram} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="Instagram">
                   <FiInstagram className="text-2xl" />
                 </a>
-                <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="LinkedIn">
+                <a href={contactInfo.socialLinks?.linkedin} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="LinkedIn">
                   <FiLinkedin className="text-2xl" />
                 </a>
               </div>
-            </div>
-
-            {/* Map Placeholder */}
+            </div>            {/* Map Placeholder */}
             <div className="rounded-[3rem] bg-white/60 backdrop-blur-xl shadow-2xl border border-white/30 overflow-hidden">
               <div className="h-64 bg-gray-100 flex items-center justify-center text-gray-400 relative">
                 <FiMapPin className="text-3xl mr-2 absolute left-4 top-4 z-10" />

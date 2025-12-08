@@ -1,13 +1,15 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
-const aboutStats = [
+const defaultStats = [
   { value: "50+", label: "Projects Delivered" },
   { value: "30+", label: "Happy Clients" },
   { value: "5+", label: "Years Experience" },
   { value: "100%", label: "Satisfaction" },
 ];
 
-const team = [
+const defaultTeam = [
   {
     name: "Jane Doe",
     role: "Founder & Lead Developer",
@@ -22,7 +24,47 @@ const team = [
   },
 ];
 
-const About = () => (
+const About = () => {
+  const [, setProfile] = useState(null);
+  const [stats, setStats] = useState(defaultStats);
+  const [team, setTeam] = useState(defaultTeam);
+  const [, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+        const response = await axios.get(`${apiUrl}/profile`);
+        
+        if (response.data) {
+          setProfile(response.data);
+          
+          // Update stats
+          if (response.data.stats) {
+            setStats([
+              { value: response.data.stats.projectsCompleted || "50+", label: "Projects Delivered" },
+              { value: response.data.stats.clientsSatisfied || "30+", label: "Happy Clients" },
+              { value: response.data.stats.yearsExperience || "5+", label: "Years Experience" },
+              { value: "100%", label: "Satisfaction" },
+            ]);
+          }
+          
+          // Update team
+          if (response.data.team && response.data.team.length > 0) {
+            setTeam(response.data.team);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+  return (
   <div className="relative min-h-screen overflow-hidden">
     {/* Decorative glassmorphism blobs */}
     <div className="pointer-events-none">
@@ -142,7 +184,7 @@ const About = () => (
       </div>
 
       <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center mb-16">
-        {aboutStats.map((stat, idx) => (
+        {stats.map((stat, idx) => (
           <div
             key={idx}
             className="flex flex-col items-center justify-center"
@@ -168,6 +210,7 @@ const About = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default About;

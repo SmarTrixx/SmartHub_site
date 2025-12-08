@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiCheckCircle, FiAlertCircle, FiUser } from 'react-icons/fi';
+import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import axios from 'axios';
 import AdminDashboard from '../components/AdminDashboard';
 
@@ -9,6 +9,14 @@ const AdminProfile = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [avatar, setAvatar] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamAvatarFile, setTeamAvatarFile] = useState(null);
+  const [newTeamMember, setNewTeamMember] = useState({
+    name: '',
+    role: '',
+    avatar: '',
+    bio: ''
+  });
   const [formData, setFormData] = useState({
     name: '',
     title: '',
@@ -18,6 +26,8 @@ const AdminProfile = () => {
     location: '',
     website: '',
     mission: '',
+    workAvailability: 'Available',
+    availableTime: '',
     socialLinks: {
       twitter: '',
       github: '',
@@ -49,9 +59,12 @@ const AdminProfile = () => {
         location: response.data.location || '',
         website: response.data.website || '',
         mission: response.data.mission || '',
+        workAvailability: response.data.workAvailability || 'Available',
+        availableTime: response.data.availableTime || '',
         socialLinks: response.data.socialLinks || {},
         stats: response.data.stats || {}
       });
+      setTeamMembers(response.data.team || []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -90,6 +103,25 @@ const AdminProfile = () => {
     }));
   };
 
+  const handleTeamMemberChange = (e) => {
+    const { name, value } = e.target;
+    setNewTeamMember(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const addTeamMember = () => {
+    if (newTeamMember.name && newTeamMember.role) {
+      setTeamMembers([...teamMembers, newTeamMember]);
+      setNewTeamMember({ name: '', role: '', avatar: '', bio: '' });
+    }
+  };
+
+  const removeTeamMember = (index) => {
+    setTeamMembers(teamMembers.filter((_, i) => i !== index));
+  };
+
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -112,6 +144,9 @@ const AdminProfile = () => {
           formDataObj.append(key, formData[key]);
         }
       });
+
+      // Append team
+      formDataObj.append('team', JSON.stringify(teamMembers));
 
       // Append avatar if provided
       if (avatar) {
@@ -352,8 +387,40 @@ const AdminProfile = () => {
             </div>
           </div>
 
+          {/* Availability & Work Time */}
+          <div className="border-b pb-8">
+            <h2 className="text-xl font-bold text-[#22223B] mb-4">Work Availability</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-[#22223B] mb-2">Availability Status</label>
+                <select
+                  name="workAvailability"
+                  value={formData.workAvailability}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                >
+                  <option value="Available">Available</option>
+                  <option value="Not Available">Not Available</option>
+                  <option value="On Leave">On Leave</option>
+                  <option value="Limited Time">Limited Time</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#22223B] mb-2">Available Time</label>
+                <input
+                  type="text"
+                  name="availableTime"
+                  value={formData.availableTime}
+                  onChange={handleChange}
+                  placeholder="e.g., Mon-Fri, 9 AM - 6 PM"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Social Links */}
-          <div>
+          <div className="border-b pb-8">
             <h2 className="text-xl font-bold text-[#22223B] mb-4">Social Links</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {['twitter', 'github', 'linkedin', 'instagram', 'facebook'].map((social) => (
@@ -370,6 +437,110 @@ const AdminProfile = () => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Team Management */}
+          <div>
+            <h2 className="text-xl font-bold text-[#22223B] mb-4">Team Members</h2>
+            
+            {/* Add Team Member Form */}
+            <div className="bg-gray-50 p-6 rounded-lg mb-6">
+              <h3 className="font-semibold text-[#22223B] mb-4">Add Team Member</h3>
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <input
+                  type="text"
+                  name="name"
+                  value={newTeamMember.name}
+                  onChange={handleTeamMemberChange}
+                  placeholder="Name"
+                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                />
+                <input
+                  type="text"
+                  name="role"
+                  value={newTeamMember.role}
+                  onChange={handleTeamMemberChange}
+                  placeholder="Role/Position"
+                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                />
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
+                    Avatar Image (or use URL below)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setTeamAvatarFile(e.target.files[0]);
+                        // Create preview URL
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setNewTeamMember(prev => ({
+                            ...prev,
+                            avatar: reader.result
+                          }));
+                        };
+                        reader.readAsDataURL(e.target.files[0]);
+                      }
+                    }}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Or enter Avatar URL below if not uploading image</p>
+                </div>
+                {newTeamMember.avatar && typeof newTeamMember.avatar === 'string' && newTeamMember.avatar.startsWith('data:') && (
+                  <div className="md:col-span-2">
+                    <img src={newTeamMember.avatar} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
+                  </div>
+                )}
+                <input
+                  type="url"
+                  name="avatar"
+                  value={typeof newTeamMember.avatar === 'string' && newTeamMember.avatar.startsWith('data:') ? '' : newTeamMember.avatar}
+                  onChange={handleTeamMemberChange}
+                  placeholder="Avatar URL (alternative to image upload)"
+                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                />
+                <textarea
+                  name="bio"
+                  value={newTeamMember.bio}
+                  onChange={handleTeamMemberChange}
+                  placeholder="Bio"
+                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  rows="2"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={addTeamMember}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
+              >
+                Add Member
+              </button>
+            </div>
+
+            {/* Team Members List */}
+            {teamMembers.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-[#22223B]">Current Team ({teamMembers.length})</h3>
+                {teamMembers.map((member, idx) => (
+                  <div key={idx} className="bg-gray-50 p-4 rounded-lg flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-[#22223B]">{member.name}</h4>
+                      <p className="text-sm text-gray-600">{member.role}</p>
+                      <p className="text-sm text-gray-600 mt-1">{member.bio}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeTeamMember(idx)}
+                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-all text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4 justify-end pt-6 border-t">
