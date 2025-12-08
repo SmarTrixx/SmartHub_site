@@ -10,8 +10,8 @@ const AdminProfile = () => {
   const [message, setMessage] = useState('');
   const [avatar, setAvatar] = useState(null);
   const [teamMembers, setTeamMembers] = useState([]);
-  const [teamAvatarFile, setTeamAvatarFile] = useState(null);
-  const [teamAvatarPreview, setTeamAvatarPreview] = useState(null);
+  const [teamAvatarFiles, setTeamAvatarFiles] = useState({});
+  const [teamAvatarPreviews, setTeamAvatarPreviews] = useState({});
   const [newTeamMember, setNewTeamMember] = useState({
     name: '',
     role: '',
@@ -114,10 +114,25 @@ const AdminProfile = () => {
 
   const addTeamMember = () => {
     if (newTeamMember.name && newTeamMember.role) {
+      const newIndex = teamMembers.length;
       setTeamMembers([...teamMembers, newTeamMember]);
+      
+      // Store file reference if one was selected
+      if (teamAvatarFiles[newIndex]) {
+        // File will be preserved in teamAvatarFiles
+      }
+      
       setNewTeamMember({ name: '', role: '', avatar: '', bio: '' });
-      setTeamAvatarFile(null);
-      setTeamAvatarPreview(null);
+      setTeamAvatarFiles(prev => {
+        const newFiles = { ...prev };
+        delete newFiles[newIndex];
+        return newFiles;
+      });
+      setTeamAvatarPreviews(prev => {
+        const newPreviews = { ...prev };
+        delete newPreviews[newIndex];
+        return newPreviews;
+      });
     }
   };
 
@@ -149,12 +164,18 @@ const AdminProfile = () => {
       });
 
       // Append team
-      formDataObj.append('team', JSON.stringify(teamMembers));
+      const teamWithAvatarIndices = teamMembers.map((member, idx) => ({
+        ...member,
+        _fileIndex: teamAvatarFiles[idx] ? idx : null
+      }));
+      formDataObj.append('team', JSON.stringify(teamWithAvatarIndices));
 
-      // Append team avatar if provided
-      if (teamAvatarFile) {
-        formDataObj.append('teamAvatar', teamAvatarFile);
-      }
+      // Append all team avatar files
+      Object.entries(teamAvatarFiles).forEach(([index, file]) => {
+        if (file && index !== 'temp') {
+          formDataObj.append(`teamAvatar_${index}`, file);
+        }
+      });
 
       // Append avatar if provided
       if (avatar) {
@@ -480,28 +501,36 @@ const AdminProfile = () => {
                     accept="image/*"
                     onChange={(e) => {
                       if (e.target.files?.[0]) {
-                        setTeamAvatarFile(e.target.files[0]);
+                        const file = e.target.files[0];
+                        // Store file with temp index (will be reassigned when member is added)
+                        setTeamAvatarFiles(prev => ({
+                          ...prev,
+                          'temp': file
+                        }));
                         // Create preview URL
-                        const previewUrl = URL.createObjectURL(e.target.files[0]);
-                        setTeamAvatarPreview(previewUrl);
+                        const previewUrl = URL.createObjectURL(file);
+                        setTeamAvatarPreviews(prev => ({
+                          ...prev,
+                          'temp': previewUrl
+                        }));
                       }
                     }}
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                   />
                   <p className="text-xs text-gray-500 mt-1">Or enter Avatar URL below if not uploading image</p>
                 </div>
-                {teamAvatarPreview && (
+                {teamAvatarPreviews['temp'] && (
                   <div className="md:col-span-2">
-                    <img src={teamAvatarPreview} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
+                    <img src={teamAvatarPreviews['temp']} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
                   </div>
                 )}
                 <input
                   type="url"
                   name="avatar"
-                  value={teamAvatarFile ? '' : newTeamMember.avatar}
+                  value={teamAvatarFiles['temp'] ? '' : newTeamMember.avatar}
                   onChange={handleTeamMemberChange}
                   placeholder="Avatar URL (alternative to image upload)"
-                  disabled={teamAvatarFile ? true : false}
+                  disabled={teamAvatarFiles['temp'] ? true : false}
                   className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF] disabled:bg-gray-100"
                 />
                 <textarea
