@@ -17,6 +17,8 @@ const ProjectDetail = () => {
     // Ensure scroll is enabled when component mounts
     document.body.style.overflow = 'auto';
 
+    let isMounted = true;
+
     const loadProject = async () => {
       console.log(`[ProjectDetail] Loading project: ${projectId}`);
       
@@ -26,6 +28,8 @@ const ProjectDetail = () => {
         console.log(`[ProjectDetail] API URL: ${url}`);
         
         const response = await axios.get(url);
+        if (!isMounted) return;
+        
         console.log(`[ProjectDetail] ✓ Success:`, response.data.id);
         setProject(response.data);
         
@@ -38,14 +42,16 @@ const ProjectDetail = () => {
             item.tags && response.data.tags &&
             item.tags.some(tag => response.data.tags.includes(tag))
           ).slice(0, 3);
-          setRelatedProjects(related);
+          if (isMounted) setRelatedProjects(related);
         } catch (e) {
           console.error('Related projects error:', e);
-          setRelatedProjects([]);
+          if (isMounted) setRelatedProjects([]);
         }
         
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       } catch (err) {
+        if (!isMounted) return;
+        
         console.log(`[ProjectDetail] ✗ API Error:`, err.response?.status, err.message);
         
         // Try static data
@@ -62,6 +68,7 @@ const ProjectDetail = () => {
         } else {
           console.log(`[ProjectDetail] ✗ Not found - redirecting to portfolio`);
           setIsLoading(false);
+          // Use navigate from router - it's stable enough for error cases
           navigate('/portfolio', { replace: true });
         }
       }
@@ -70,9 +77,10 @@ const ProjectDetail = () => {
     loadProject();
 
     return () => {
+      isMounted = false;
       document.body.style.overflow = 'auto';
     };
-  }, [projectId, navigate]);
+  }, [projectId]);
 
   const handlePrevImage = () => {
     if (project && project.images) {
