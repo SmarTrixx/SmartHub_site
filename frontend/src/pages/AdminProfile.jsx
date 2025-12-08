@@ -311,7 +311,6 @@ const AdminProfile = () => {
                   value={formData.name}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                  required
                 />
               </div>
               <div>
@@ -333,7 +332,6 @@ const AdminProfile = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                  required
                 />
               </div>
               <div>
