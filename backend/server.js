@@ -49,6 +49,38 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/contact', contactRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'SmartHub Backend API',
+    status: 'running',
+    endpoints: [
+      '/api/health',
+      '/api/profile',
+      '/api/projects',
+      '/api/services',
+      '/api/contact',
+      '/api/auth'
+    ]
+  });
+});
+
+// API root endpoint
+app.get('/api', (req, res) => {
+  res.json({ 
+    message: 'SmartHub Backend API',
+    status: 'running',
+    endpoints: [
+      '/api/health',
+      '/api/profile',
+      '/api/projects',
+      '/api/services',
+      '/api/contact',
+      '/api/auth'
+    ]
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'API is running' });
