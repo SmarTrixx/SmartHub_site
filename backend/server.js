@@ -32,7 +32,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/smarthub'
   })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
+    // Don't exit on Vercel - just log the error
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   });
 
 // Import routes
