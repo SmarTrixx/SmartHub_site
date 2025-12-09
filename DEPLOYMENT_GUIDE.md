@@ -118,11 +118,11 @@ git prune
 #### Step 2: Deploy Backend to Vercel
 1. On Vercel, click "New Project"
 2. Select your backend repository (or SmartHub_site with filters)
-3. Configure:
+3. Configuration is handled by `backend/vercel.json`:
    - **Root Directory**: `backend/` (if in same repo)
-   - **Build Command**: `npm install`
-   - **Output Directory**: Leave empty (Node.js doesn't need this)
-   - **Start Command**: `node server.js`
+   - **Build Command**: (automatic - handled by vercel.json)
+   - **Install Command**: `npm install`
+   - Backend automatically detected as serverless function
 
 4. Add Environment Variables in Vercel:
    - Go to "Settings" → "Environment Variables"
@@ -138,6 +138,39 @@ git prune
    | `NODE_ENV` | `production` |
 
 5. Click "Deploy"
+
+**Backend vercel.json Configuration Reference:**
+
+The backend uses this `vercel.json` configuration for Vercel deployment:
+
+```json
+{
+  "version": 2,
+  "installCommand": "npm install",
+  "buildCommand": "",
+  "functions": {
+    "server.js": {
+      "memory": 512,
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret",
+    "GMAIL_USER": "@gmail_user",
+    "GMAIL_PASSWORD": "@gmail_password",
+    "FRONTEND_URL": "@frontend_url",
+    "NODE_ENV": "production"
+  }
+}
+```
+
+**Why This Configuration:**
+- `buildCommand: ""` - Prevents `npm run build` errors (Node serverless runs directly)
+- `functions` - Registers server.js as serverless function
+- `memory: 512` - Maximum memory allocation
+- `maxDuration: 30` - Timeout in seconds (can be increased later)
+- Environment variables referenced with `@` are linked to Vercel project settings
 
 ### Option B: Deploy Backend + Frontend Together
 
