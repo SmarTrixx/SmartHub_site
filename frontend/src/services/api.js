@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Ensure API_BASE_URL is properly formatted without trailing slashes
+let apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Remove trailing slash if present
+apiUrl = apiUrl.replace(/\/$/, '');
+
+const API_BASE_URL = apiUrl;
 
 // Create axios instance with default config
 const api = axios.create({
