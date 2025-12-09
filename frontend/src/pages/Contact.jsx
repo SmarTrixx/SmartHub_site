@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiSend, FiMapPin, FiPhone, FiMail, FiCheckCircle, FiTwitter, FiFacebook, FiInstagram, FiLinkedin } from 'react-icons/fi';
+import { FiSend, FiMapPin, FiPhone, FiMail, FiCheckCircle, FiAlertCircle, FiTwitter, FiFacebook, FiInstagram, FiLinkedin } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 
@@ -84,18 +84,34 @@ const Contact = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       setIsSubmitting(true);
-      // Simulate API call
-      setTimeout(() => {
+      // Clear any previous submission errors
+      setErrors({});
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+        const response = await axios.post(`${apiUrl}/contact`, {
+          name: formData.name,
+          email: formData.email,
+          message: formData.message
+        });
+
+        if (response.data.success) {
+          setIsSuccess(true);
+          setFormData({ name: '', email: '', message: '' });
+          // Hide success message after 5 seconds
+          setTimeout(() => setIsSuccess(false), 5000);
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        setErrors({
+          submit: error.response?.data?.message || 'Failed to send message. Please try again.'
+        });
+      } finally {
         setIsSubmitting(false);
-        setIsSuccess(true);
-        setFormData({ name: '', email: '', message: '' });
-        // Hide success message after 5 seconds
-        setTimeout(() => setIsSuccess(false), 5000);
-      }, 1500);
+      }
     }
   };
 
@@ -148,6 +164,20 @@ const Contact = () => {
                 <div>
                   <p className="font-medium">Thank you for your message!</p>
                   <p className="text-sm">We'll get back to you as soon as possible.</p>
+                </div>
+              </motion.div>
+            )}
+
+            {errors.submit && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-50 text-red-700 rounded-[3rem] flex items-start"
+              >
+                <FiAlertCircle className="text-red-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Failed to send message</p>
+                  <p className="text-sm">{errors.submit}</p>
                 </div>
               </motion.div>
             )}
@@ -252,7 +282,7 @@ const Contact = () => {
                     <FiMapPin className="text-[#0057FF] text-xl" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Location</h3>
+                    <h3 className="font-medium text-gray-900">Office</h3>
                     <p className="text-gray-600">{contactInfo.location}</p>
                   </div>
                 </div>
