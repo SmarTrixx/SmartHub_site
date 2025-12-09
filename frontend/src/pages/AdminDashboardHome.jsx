@@ -11,7 +11,6 @@ const AdminDashboardHome = () => {
     services: 0,
     profile: null
   });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
@@ -34,10 +33,8 @@ const AdminDashboardHome = () => {
         services: servicesRes.data.length || 0,
         profile: profileRes.data
       });
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching stats:', error);
-      setLoading(false);
     }
   };
 

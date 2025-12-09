@@ -80,7 +80,7 @@ const ProjectDetail = () => {
       isMounted = false;
       document.body.style.overflow = 'auto';
     };
-  }, [projectId]);
+  }, [projectId, navigate]);
 
   const handlePrevImage = () => {
     if (project && project.images) {

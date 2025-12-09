@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiEye, FiCheckCircle, FiAlertCircle, FiImage } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiCheckCircle, FiAlertCircle, FiImage } from 'react-icons/fi';
 import axios from 'axios';
 import AdminDashboard from '../components/AdminDashboard';
 

@@ -24,7 +24,7 @@ const AdminDashboard = ({ children }) => {
 
     // Verify token is still valid
     verifyToken(token);
-  }, [navigate]);
+  }, [navigate, verifyToken]);
 
   const verifyToken = async (token) => {
     try {
