@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "buildCommand": "npm install",
+  "installCommand": "npm install",
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret",
+    "GMAIL_USER": "@gmail_user",
+    "GMAIL_PASSWORD": "@gmail_password",
+    "FRONTEND_URL": "@frontend_url",
+    "NODE_ENV": "production"
+  }
+}
