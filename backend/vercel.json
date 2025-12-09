@@ -1,11 +1,5 @@
 {
   "version": 2,
   "installCommand": "npm install",
-  "buildCommand": "",
-  "functions": {
-    "server.js": {
-      "memory": 512,
-      "maxDuration": 30
-    }
-  }
+  "buildCommand": ""
 }
