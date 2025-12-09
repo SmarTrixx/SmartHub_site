@@ -118,11 +118,12 @@ git prune
 #### Step 2: Deploy Backend to Vercel
 1. On Vercel, click "New Project"
 2. Select your backend repository (or SmartHub_site with filters)
-3. Configuration is handled by `backend/vercel.json`:
-   - **Root Directory**: `backend/` (if in same repo)
-   - **Build Command**: (automatic - handled by vercel.json)
-   - **Install Command**: `npm install`
-   - Backend automatically detected as serverless function
+3. Vercel will auto-detect the backend as Root Directory
+4. Configuration:
+   - **Root Directory**: `backend/` (auto-detected)
+   - **Build Command**: Leave as default (will use `npm run build`)
+   - **Install Command**: Leave as default (will use `npm install`)
+   - Backend will deploy as serverless function
 
 4. Add Environment Variables in Vercel:
    - Go to "Settings" → "Environment Variables"
@@ -171,6 +172,17 @@ The backend uses this `vercel.json` configuration for Vercel deployment:
 - `memory: 512` - Maximum memory allocation
 - `maxDuration: 30` - Timeout in seconds (can be increased later)
 - Environment variables referenced with `@` are linked to Vercel project settings
+
+**Backend Build Script:**
+The backend `package.json` includes an empty build script:
+```json
+"scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js",
+  "build": "echo 'No build needed for serverless function'"
+}
+```
+This allows Vercel to complete the build phase without errors since Node.js serverless functions don't require compilation.
 
 ### Option B: Deploy Backend + Frontend Together
 
