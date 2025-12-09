@@ -53,9 +53,17 @@ if (fs.existsSync(path.join(__dirname, 'uploads'))) {
 // Database connection
 let mongoDBConnected = false;
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/smarthub', {
-  serverSelectionTimeoutMS: 5000,
-  connectTimeoutMS: 5000,
+// Enhanced MongoDB connection with better timeout handling
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/smarthub';
+console.log('🔄 Attempting to connect to MongoDB...');
+console.log('📍 URI (hidden for security):', mongoURI ? 'Set' : 'Using localhost fallback');
+
+mongoose.connect(mongoURI, {
+  serverSelectionTimeoutMS: 15000,  // Increased for Vercel cold starts
+  socketTimeoutMS: 15000,
+  connectTimeoutMS: 15000,
+  maxPoolSize: 10,
+  family: 4  // Use IPv4, skip trying IPv6
 })
   .then(() => {
     mongoDBConnected = true;
@@ -64,6 +72,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/smarthub'
   .catch(err => {
     mongoDBConnected = false;
     console.error('❌ MongoDB connection error:', err.message);
+    console.error('🔍 Connection details - URI set:', !!process.env.MONGODB_URI);
+    console.error('🔍 NODE_ENV:', process.env.NODE_ENV);
     // Don't exit on Vercel - just log the error
     if (process.env.NODE_ENV !== 'production') {
       process.exit(1);
