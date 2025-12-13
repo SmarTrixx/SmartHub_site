@@ -120,8 +120,8 @@ import contactRoutes from './routes/contact.js';
 
 // Middleware to check MongoDB connection for API routes
 app.use('/api/', (req, res, next) => {
-  // Allow health check even without DB
-  if (req.path === '/health') {
+  // Allow health check and diagnostic endpoints even without DB
+  if (req.path === '/health' || req.path === '/diagnose') {
     return next();
   }
   
@@ -194,6 +194,8 @@ app.get('/api/diagnose', (req, res) => {
   const mongoUriSet = !!process.env.MONGODB_URI;
   const mongoUriLength = process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0;
   const mongoUriHasPassword = process.env.MONGODB_URI ? process.env.MONGODB_URI.includes(':') : false;
+  const mongoUriMasked = process.env.MONGODB_URI ? 
+    process.env.MONGODB_URI.replace(/:[^@]+@/, ':****@') : 'NOT SET';
 
   res.json({
     status: 'Diagnostic Report',
@@ -215,6 +217,7 @@ app.get('/api/diagnose', (req, res) => {
       mongoUriConfigured: mongoUriSet,
       mongoUriLength: mongoUriLength,
       mongoUriHasPassword: mongoUriHasPassword,
+      mongoUriMasked: mongoUriMasked,
       mongoUriProvider: mongoUriSet && mongoUriLength > 0 ? (
         process.env.MONGODB_URI.includes('mongodb+srv') ? 'MongoDB Atlas' : 'Local/Other'
       ) : 'not configured'
@@ -222,20 +225,33 @@ app.get('/api/diagnose', (req, res) => {
     configuration: {
       FRONTEND_URL: process.env.FRONTEND_URL || 'not set',
       NODE_ENV: process.env.NODE_ENV || 'development',
-      MONGODB_URI_SET: mongoUriSet ? 'yes' : 'NO - THIS IS THE PROBLEM',
-      JWT_SECRET_SET: !!process.env.JWT_SECRET ? 'yes' : 'no',
-      GMAIL_USER_SET: !!process.env.GMAIL_USER ? 'yes' : 'no'
+      MONGODB_URI_SET: mongoUriSet ? 'yes ✓' : 'NO ✗ - THIS IS THE PROBLEM',
+      JWT_SECRET_SET: !!process.env.JWT_SECRET ? 'yes ✓' : 'no ✗',
+      GMAIL_USER_SET: !!process.env.GMAIL_USER ? 'yes ✓' : 'no ✗'
     },
     troubleshooting: {
-      message: !mongoUriSet ? 'CRITICAL: MONGODB_URI environment variable not set!' : (
-        dbConnectionState !== 1 ? 'MongoDB is configured but not connected. Check your connection string and IP whitelist.' : 'MongoDB is connected successfully!'
+      message: !mongoUriSet ? '🔴 CRITICAL: MONGODB_URI environment variable not set on Vercel!' : (
+        dbConnectionState === 1 ? '🟢 MongoDB is connected successfully!' : (
+          connectionAttempts > 0 ? `🟡 MongoDB connection attempted ${connectionAttempts} time(s) but failed. Check your connection string.` : '🔴 No connection attempts made yet'
+        )
       ),
-      nextSteps: [
-        !mongoUriSet ? '1. Set MONGODB_URI environment variable in Vercel' : '1. MONGODB_URI is set ✓',
-        '2. Check MongoDB Atlas Network Access allows 0.0.0.0/0 or Vercel IPs',
-        '3. Verify database user password is correct',
-        '4. Check connection string for special characters that need URL encoding'
-      ]
+      nextSteps: !mongoUriSet ? [
+        '1. ✗ MONGODB_URI is NOT set on Vercel - SET IT NOW',
+        '2. Go to Vercel Dashboard → smarthubzbackend → Settings → Environment Variables',
+        '3. Add: MONGODB_URI = mongodb+srv://smarthub-admin:NDpHX8RyRDwEw2pi@smarthubz.j6wwkxo.mongodb.net/?appName=SmartHubz',
+        '4. Click Redeploy'
+      ] : (
+        dbConnectionState !== 1 ? [
+          '1. ✓ MONGODB_URI is set',
+          '2. ✗ Connection failed - likely causes:',
+          '   a. Wrong password for smarthub-admin user',
+          '   b. IP whitelist doesn\'t include Vercel IPs (set to 0.0.0.0/0)',
+          '   c. Database name in URI is incorrect',
+          '   d. Special characters in password not URL encoded'
+        ] : [
+          '✓ Everything looks good!'
+        ]
+      )
     }
   });
 });
