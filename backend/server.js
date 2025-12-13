@@ -52,33 +52,53 @@ if (fs.existsSync(path.join(__dirname, 'uploads'))) {
 
 // Database connection
 let mongoDBConnected = false;
+let connectionAttempts = 0;
 
-// Enhanced MongoDB connection with better timeout handling
+// Enhanced MongoDB connection with better timeout handling and retry
 const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/smarthub';
 console.log('🔄 Attempting to connect to MongoDB...');
-console.log('📍 URI (hidden for security):', mongoURI ? 'Set' : 'Using localhost fallback');
+console.log('📍 Environment:', process.env.NODE_ENV || 'development');
+console.log('📍 MongoDB Atlas URI provided:', mongoURI.includes('mongodb+srv://') ? 'yes' : 'no');
 
-mongoose.connect(mongoURI, {
-  serverSelectionTimeoutMS: 15000,  // Increased for Vercel cold starts
-  socketTimeoutMS: 15000,
-  connectTimeoutMS: 15000,
-  maxPoolSize: 10,
-  family: 4  // Use IPv4, skip trying IPv6
-})
-  .then(() => {
+const connectToMongoDB = async () => {
+  connectionAttempts++;
+  console.log(`📍 Connection attempt ${connectionAttempts}...`);
+  
+  try {
+    await mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 20000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 20000,
+      maxPoolSize: 10,
+      minPoolSize: 2,
+      family: 4,
+      retryWrites: true,
+      w: 'majority'
+    });
+    
     mongoDBConnected = true;
-    console.log('✅ MongoDB connected successfully');
-  })
-  .catch(err => {
+    console.log('✅ MongoDB connected successfully on attempt', connectionAttempts);
+    return true;
+  } catch (err) {
     mongoDBConnected = false;
     console.error('❌ MongoDB connection error:', err.message);
-    console.error('🔍 Connection details - URI set:', !!process.env.MONGODB_URI);
-    console.error('🔍 NODE_ENV:', process.env.NODE_ENV);
-    // Don't exit on Vercel - just log the error
-    if (process.env.NODE_ENV !== 'production') {
+    console.error('📍 Error code:', err.code);
+    console.error('📍 Connection URI has password:', mongoURI.includes(':') ? 'yes' : 'no');
+    
+    // Retry connection after delay on Vercel
+    if (process.env.NODE_ENV === 'production' && connectionAttempts < 3) {
+      console.log(`⏱️ Retrying in 5 seconds...`);
+      setTimeout(connectToMongoDB, 5000);
+    } else if (process.env.NODE_ENV !== 'production') {
       process.exit(1);
     }
-  });
+    
+    return false;
+  }
+};
+
+// Start initial connection attempt
+connectToMongoDB();
 
 // Monitor MongoDB connection state
 mongoose.connection.on('disconnected', () => {
@@ -173,30 +193,49 @@ app.get('/api/diagnose', (req, res) => {
 
   const mongoUriSet = !!process.env.MONGODB_URI;
   const mongoUriLength = process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0;
+  const mongoUriHasPassword = process.env.MONGODB_URI ? process.env.MONGODB_URI.includes(':') : false;
 
   res.json({
     status: 'Diagnostic Report',
     timestamp: new Date().toISOString(),
+    connectionAttempts: connectionAttempts,
     server: {
       environment: process.env.NODE_ENV || 'development',
       nodeVersion: process.version,
-      mongooseVersion: mongoose.version
+      mongooseVersion: mongoose.version,
+      uptime: process.uptime()
     },
     database: {
       connectionState: dbStates[dbConnectionState],
       stateCode: dbConnectionState,
       connected: dbConnectionState === 1,
       host: mongoose.connection.host || 'unknown',
-      name: mongoose.connection.name || 'unknown',
+      port: mongoose.connection.port || 'unknown',
+      database: mongoose.connection.name || 'unknown',
       mongoUriConfigured: mongoUriSet,
-      mongoUriLength: mongoUriLength
+      mongoUriLength: mongoUriLength,
+      mongoUriHasPassword: mongoUriHasPassword,
+      mongoUriProvider: mongoUriSet && mongoUriLength > 0 ? (
+        process.env.MONGODB_URI.includes('mongodb+srv') ? 'MongoDB Atlas' : 'Local/Other'
+      ) : 'not configured'
     },
     configuration: {
       FRONTEND_URL: process.env.FRONTEND_URL || 'not set',
-      NODE_ENV: process.env.NODE_ENV || 'not set',
-      MONGODB_URI_EXISTS: mongoUriSet ? 'yes' : 'no',
-      JWT_SECRET_EXISTS: !!process.env.JWT_SECRET ? 'yes' : 'no',
-      GMAIL_USER_EXISTS: !!process.env.GMAIL_USER ? 'yes' : 'no'
+      NODE_ENV: process.env.NODE_ENV || 'development',
+      MONGODB_URI_SET: mongoUriSet ? 'yes' : 'NO - THIS IS THE PROBLEM',
+      JWT_SECRET_SET: !!process.env.JWT_SECRET ? 'yes' : 'no',
+      GMAIL_USER_SET: !!process.env.GMAIL_USER ? 'yes' : 'no'
+    },
+    troubleshooting: {
+      message: !mongoUriSet ? 'CRITICAL: MONGODB_URI environment variable not set!' : (
+        dbConnectionState !== 1 ? 'MongoDB is configured but not connected. Check your connection string and IP whitelist.' : 'MongoDB is connected successfully!'
+      ),
+      nextSteps: [
+        !mongoUriSet ? '1. Set MONGODB_URI environment variable in Vercel' : '1. MONGODB_URI is set ✓',
+        '2. Check MongoDB Atlas Network Access allows 0.0.0.0/0 or Vercel IPs',
+        '3. Verify database user password is correct',
+        '4. Check connection string for special characters that need URL encoding'
+      ]
     }
   });
 });
