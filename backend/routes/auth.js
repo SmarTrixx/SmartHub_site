@@ -6,6 +6,46 @@ import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Setup - Create default admin if none exists
+router.post('/setup', async (req, res) => {
+  try {
+    // Check if any admin exists
+    const existingAdmin = await Admin.findOne();
+    if (existingAdmin) {
+      return res.status(400).json({ 
+        message: 'Admin already exists. Cannot run setup again.',
+        admin: {
+          email: existingAdmin.email,
+          name: existingAdmin.name
+        }
+      });
+    }
+
+    // Create default admin
+    const admin = new Admin({
+      email: 'admin@smarthub.com',
+      password: 'demo123456',
+      name: 'Admin User',
+      role: 'admin'
+    });
+
+    await admin.save();
+
+    res.status(201).json({
+      message: 'Default admin account created successfully',
+      admin: {
+        email: admin.email,
+        name: admin.name,
+        role: admin.role
+      },
+      nextSteps: 'Use these credentials to login: admin@smarthub.com / demo123456'
+    });
+  } catch (error) {
+    console.error('Setup error:', error);
+    res.status(500).json({ message: 'Error during setup', error: error.message });
+  }
+});
+
 // Register (admin setup - ideally only done once)
 router.post('/register', 
   [
