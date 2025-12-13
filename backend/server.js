@@ -53,6 +53,7 @@ if (fs.existsSync(path.join(__dirname, 'uploads'))) {
 // Database connection
 let mongoDBConnected = false;
 let connectionAttempts = 0;
+let lastConnectionError = null;
 
 // Enhanced MongoDB connection with better timeout handling and retry
 const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/smarthub';
@@ -60,42 +61,68 @@ console.log('🔄 Attempting to connect to MongoDB...');
 console.log('📍 Environment:', process.env.NODE_ENV || 'development');
 console.log('📍 MongoDB Atlas URI provided:', mongoURI.includes('mongodb+srv://') ? 'yes' : 'no');
 
+// Parse and log connection string details
+if (mongoURI.includes('mongodb+srv://')) {
+  try {
+    const urlObj = new URL(mongoURI);
+    console.log('📍 MongoDB Host:', urlObj.hostname);
+    console.log('📍 Database:', urlObj.pathname.replace('/', '') || 'admin');
+    console.log('📍 Username:', urlObj.username);
+  } catch (e) {
+    console.error('📍 Failed to parse MongoDB URI:', e.message);
+  }
+}
+
 const connectToMongoDB = async () => {
   connectionAttempts++;
-  console.log(`📍 Connection attempt ${connectionAttempts}...`);
+  console.log(`\n📍 Connection attempt ${connectionAttempts}...`);
   
+  // Create a promise that rejects after timeout
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Connection timeout after 35 seconds'));
+    }, 35000);
+  });
+
   try {
-    await mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 30000,  // Increased to 30s
-      socketTimeoutMS: 60000,            // Increased to 60s
-      connectTimeoutMS: 30000,           // Increased to 30s
-      maxPoolSize: 5,                    // Reduced for better Vercel compatibility
-      minPoolSize: 1,                    // Reduced minimum
-      maxIdleTimeMS: 45000,              // Added idle timeout
-      family: 4,                         // IPv4 only
+    const connectionPromise = mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 35000,
+      socketTimeoutMS: 65000,
+      connectTimeoutMS: 35000,
+      maxPoolSize: 3,
+      minPoolSize: 0,
+      maxIdleTimeMS: 45000,
+      family: 4,
       retryWrites: true,
       w: 'majority',
-      authSource: 'admin',               // Added explicit auth source
-      serverMonitoringMode: 'poll'       // Added explicit monitoring mode
+      authSource: 'admin',
+      serverMonitoringMode: 'poll',
+      compressors: 'snappy,zlib'
     });
+
+    // Race between connection and timeout
+    await Promise.race([connectionPromise, timeoutPromise]);
     
     mongoDBConnected = true;
+    lastConnectionError = null;
     console.log('✅ MongoDB connected successfully on attempt', connectionAttempts);
+    console.log('   Host:', mongoose.connection.host);
+    console.log('   Database:', mongoose.connection.name);
     return true;
   } catch (err) {
     mongoDBConnected = false;
+    lastConnectionError = err.message;
     console.error('❌ MongoDB connection error:', err.message);
-    console.error('📍 Error code:', err.code);
-    console.error('📍 Error type:', err.name);
-    console.error('📍 Connection URI has password:', mongoURI.includes(':') ? 'yes' : 'no');
-    console.error('📍 Full error:', err);
+    console.error('   Error code:', err.code || 'N/A');
+    console.error('   Error type:', err.name);
     
     // Retry connection after delay on Vercel
     if (process.env.NODE_ENV === 'production' && connectionAttempts < 5) {
-      const delayMs = connectionAttempts * 3000; // Exponential backoff: 3s, 6s, 9s, 12s, 15s
-      console.log(`⏱️ Retrying in ${delayMs}ms...`);
+      const delayMs = Math.pow(2, connectionAttempts) * 2000; // Exponential: 4s, 8s, 16s, 32s, 64s
+      console.log(`⏱️ Retrying in ${delayMs}ms (attempt ${connectionAttempts + 1}/5)...`);
       setTimeout(connectToMongoDB, delayMs);
     } else if (process.env.NODE_ENV !== 'production') {
+      console.error('Development mode - exiting due to connection failure');
       process.exit(1);
     }
     
@@ -103,7 +130,8 @@ const connectToMongoDB = async () => {
   }
 };
 
-// Start initial connection attempt
+// Start initial connection attempt (non-blocking)
+console.log('Starting MongoDB connection in background...\n');
 connectToMongoDB();
 
 // Monitor MongoDB connection state
@@ -221,6 +249,7 @@ app.get('/api/diagnose', (req, res) => {
     status: 'Diagnostic Report',
     timestamp: new Date().toISOString(),
     connectionAttempts: connectionAttempts,
+    lastConnectionError: lastConnectionError,
     server: {
       environment: process.env.NODE_ENV || 'development',
       nodeVersion: process.version,
