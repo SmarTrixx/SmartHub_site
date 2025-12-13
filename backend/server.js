@@ -97,7 +97,11 @@ const connectToMongoDB = async () => {
       w: 'majority',
       authSource: 'admin',
       serverMonitoringMode: 'poll',
-      compressors: 'snappy,zlib'
+      compressors: 'snappy,zlib',
+      driverInfo: {
+        name: 'mongoose',
+        version: mongoose.version
+      }
     });
 
     // Race between connection and timeout
@@ -108,6 +112,7 @@ const connectToMongoDB = async () => {
     console.log('✅ MongoDB connected successfully on attempt', connectionAttempts);
     console.log('   Host:', mongoose.connection.host);
     console.log('   Database:', mongoose.connection.name);
+    console.log('   Port:', mongoose.connection.port);
     return true;
   } catch (err) {
     mongoDBConnected = false;
@@ -115,6 +120,7 @@ const connectToMongoDB = async () => {
     console.error('❌ MongoDB connection error:', err.message);
     console.error('   Error code:', err.code || 'N/A');
     console.error('   Error type:', err.name);
+    console.error('   Stack:', err.stack?.split('\n').slice(0, 3).join('\n') || 'N/A');
     
     // Retry connection after delay on Vercel
     if (process.env.NODE_ENV === 'production' && connectionAttempts < 5) {
