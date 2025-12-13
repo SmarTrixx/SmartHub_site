@@ -161,6 +161,46 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Diagnostic endpoint for troubleshooting
+app.get('/api/diagnose', (req, res) => {
+  const dbConnectionState = mongoose.connection.readyState;
+  const dbStates = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting'
+  };
+
+  const mongoUriSet = !!process.env.MONGODB_URI;
+  const mongoUriLength = process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0;
+
+  res.json({
+    status: 'Diagnostic Report',
+    timestamp: new Date().toISOString(),
+    server: {
+      environment: process.env.NODE_ENV || 'development',
+      nodeVersion: process.version,
+      mongooseVersion: mongoose.version
+    },
+    database: {
+      connectionState: dbStates[dbConnectionState],
+      stateCode: dbConnectionState,
+      connected: dbConnectionState === 1,
+      host: mongoose.connection.host || 'unknown',
+      name: mongoose.connection.name || 'unknown',
+      mongoUriConfigured: mongoUriSet,
+      mongoUriLength: mongoUriLength
+    },
+    configuration: {
+      FRONTEND_URL: process.env.FRONTEND_URL || 'not set',
+      NODE_ENV: process.env.NODE_ENV || 'not set',
+      MONGODB_URI_EXISTS: mongoUriSet ? 'yes' : 'no',
+      JWT_SECRET_EXISTS: !!process.env.JWT_SECRET ? 'yes' : 'no',
+      GMAIL_USER_EXISTS: !!process.env.GMAIL_USER ? 'yes' : 'no'
+    }
+  });
+});
+
 // API root endpoint
 app.get('/api', (req, res) => {
   res.json({ 
@@ -168,6 +208,7 @@ app.get('/api', (req, res) => {
     status: 'running',
     endpoints: [
       '/api/health',
+      '/api/diagnose',
       '/api/profile',
       '/api/projects',
       '/api/services',
