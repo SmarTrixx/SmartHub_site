@@ -96,12 +96,7 @@ const connectToMongoDB = async () => {
       retryWrites: true,
       w: 'majority',
       authSource: 'admin',
-      serverMonitoringMode: 'poll',
-      compressors: 'snappy,zlib',
-      driverInfo: {
-        name: 'mongoose',
-        version: mongoose.version
-      }
+      compressors: 'snappy,zlib'
     });
 
     // Race between connection and timeout
