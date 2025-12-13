@@ -66,14 +66,17 @@ const connectToMongoDB = async () => {
   
   try {
     await mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 20000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 20000,
-      maxPoolSize: 10,
-      minPoolSize: 2,
-      family: 4,
+      serverSelectionTimeoutMS: 30000,  // Increased to 30s
+      socketTimeoutMS: 60000,            // Increased to 60s
+      connectTimeoutMS: 30000,           // Increased to 30s
+      maxPoolSize: 5,                    // Reduced for better Vercel compatibility
+      minPoolSize: 1,                    // Reduced minimum
+      maxIdleTimeMS: 45000,              // Added idle timeout
+      family: 4,                         // IPv4 only
       retryWrites: true,
-      w: 'majority'
+      w: 'majority',
+      authSource: 'admin',               // Added explicit auth source
+      serverMonitoringMode: 'poll'       // Added explicit monitoring mode
     });
     
     mongoDBConnected = true;
@@ -83,12 +86,15 @@ const connectToMongoDB = async () => {
     mongoDBConnected = false;
     console.error('❌ MongoDB connection error:', err.message);
     console.error('📍 Error code:', err.code);
+    console.error('📍 Error type:', err.name);
     console.error('📍 Connection URI has password:', mongoURI.includes(':') ? 'yes' : 'no');
+    console.error('📍 Full error:', err);
     
     // Retry connection after delay on Vercel
-    if (process.env.NODE_ENV === 'production' && connectionAttempts < 3) {
-      console.log(`⏱️ Retrying in 5 seconds...`);
-      setTimeout(connectToMongoDB, 5000);
+    if (process.env.NODE_ENV === 'production' && connectionAttempts < 5) {
+      const delayMs = connectionAttempts * 3000; // Exponential backoff: 3s, 6s, 9s, 12s, 15s
+      console.log(`⏱️ Retrying in ${delayMs}ms...`);
+      setTimeout(connectToMongoDB, delayMs);
     } else if (process.env.NODE_ENV !== 'production') {
       process.exit(1);
     }
@@ -101,12 +107,26 @@ const connectToMongoDB = async () => {
 connectToMongoDB();
 
 // Monitor MongoDB connection state
+mongoose.connection.on('connecting', () => {
+  console.log('🔄 MongoDB is connecting...');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error event:', err.message);
+  mongoDBConnected = false;
+});
+
 mongoose.connection.on('disconnected', () => {
   mongoDBConnected = false;
   console.warn('⚠️ MongoDB disconnected');
 });
 
 mongoose.connection.on('connected', () => {
+  mongoDBConnected = true;
+  console.log('✅ MongoDB connected');
+});
+
+mongoose.connection.on('reconnected', () => {
   mongoDBConnected = true;
   console.log('✅ MongoDB reconnected');
 });
