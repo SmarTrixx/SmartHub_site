@@ -4,6 +4,57 @@ import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import axios from 'axios';
 import AdminDashboard from '../components/AdminDashboard';
 
+// Image compression utility
+const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            // Create a new File object with the compressed blob
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            console.log(`📸 Image compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
+            resolve(compressedFile);
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+  });
+};
+
 const AdminProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -184,10 +235,16 @@ const AdminProfile = () => {
     setTeamMembers(teamMembers.filter((_, i) => i !== index));
   };
 
-  const handleAvatarChange = (e) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setAvatar(file);
+      try {
+        const compressedFile = await compressImage(file, 400, 400, 0.85);
+        setAvatar(compressedFile);
+      } catch (error) {
+        console.error('Error compressing avatar:', error);
+        setAvatar(file); // Fall back to original if compression fails
+      }
     }
   };
 
@@ -554,20 +611,35 @@ const AdminProfile = () => {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       if (e.target.files?.[0]) {
-                        const file = e.target.files[0];
-                        // Store file with temp index (will be reassigned when member is added)
-                        setTeamAvatarFiles(prev => ({
-                          ...prev,
-                          'temp': file
-                        }));
-                        // Create preview URL
-                        const previewUrl = URL.createObjectURL(file);
-                        setTeamAvatarPreviews(prev => ({
-                          ...prev,
-                          'temp': previewUrl
-                        }));
+                        try {
+                          const compressedFile = await compressImage(e.target.files[0], 300, 300, 0.85);
+                          // Store file with temp index (will be reassigned when member is added)
+                          setTeamAvatarFiles(prev => ({
+                            ...prev,
+                            'temp': compressedFile
+                          }));
+                          // Create preview URL
+                          const previewUrl = URL.createObjectURL(compressedFile);
+                          setTeamAvatarPreviews(prev => ({
+                            ...prev,
+                            'temp': previewUrl
+                          }));
+                        } catch (error) {
+                          console.error('Error compressing team avatar:', error);
+                          // Fall back to original if compression fails
+                          const file = e.target.files[0];
+                          setTeamAvatarFiles(prev => ({
+                            ...prev,
+                            'temp': file
+                          }));
+                          const previewUrl = URL.createObjectURL(file);
+                          setTeamAvatarPreviews(prev => ({
+                            ...prev,
+                            'temp': previewUrl
+                          }));
+                        }
                       }
                     }}
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
