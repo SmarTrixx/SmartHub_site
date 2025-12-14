@@ -227,15 +227,35 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'SmartHub Backend API',
     status: 'running',
+    version: '1.0.0',
     endpoints: [
       '/api/health',
+      '/api/diagnose',
       '/api/profile',
       '/api/projects',
       '/api/services',
       '/api/contact',
       '/api/auth'
-    ]
+    ],
+    note: 'All API endpoints must be accessed with /api/ prefix'
   });
+});
+
+// Catch requests to /profile, /services, /projects, etc. without /api prefix and redirect
+app.get('/:path', (req, res) => {
+  const path = req.params.path;
+  const allowedPaths = ['profile', 'projects', 'services', 'contact', 'auth', 'health', 'diagnose'];
+  
+  if (allowedPaths.includes(path)) {
+    console.warn(`⚠️ Redirecting ${req.method} /${path} to /api/${path}`);
+    res.status(301).json({
+      message: 'Use /api prefix for API endpoints',
+      redirect: `/api/${path}`,
+      correctUrl: `https://${req.get('host')}/api/${path}`
+    });
+  } else {
+    res.status(404).json({ message: 'Route not found' });
+  }
 });
 
 // Health check endpoint with database status
