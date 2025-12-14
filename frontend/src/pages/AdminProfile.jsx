@@ -51,6 +51,29 @@ const AdminProfile = () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/profile`);
       setProfile(response.data);
+      
+      // Ensure all social links are initialized
+      const socialLinks = {
+        twitter: '',
+        github: '',
+        linkedin: '',
+        instagram: '',
+        facebook: ''
+      };
+      if (response.data.socialLinks) {
+        Object.assign(socialLinks, response.data.socialLinks);
+      }
+      
+      // Ensure all stats are initialized
+      const stats = {
+        projectsCompleted: 0,
+        yearsExperience: 0,
+        clientsSatisfied: 0
+      };
+      if (response.data.stats) {
+        Object.assign(stats, response.data.stats);
+      }
+      
       setFormData({
         name: response.data.name || '',
         title: response.data.title || '',
@@ -62,8 +85,8 @@ const AdminProfile = () => {
         mission: response.data.mission || '',
         workAvailability: response.data.workAvailability || 'Available',
         availableTime: response.data.availableTime || '',
-        socialLinks: response.data.socialLinks || {},
-        stats: response.data.stats || {}
+        socialLinks: socialLinks,
+        stats: stats
       });
       setTeamMembers(response.data.team || []);
       setLoading(false);
@@ -164,7 +187,8 @@ const AdminProfile = () => {
     if (!avatar) return null;
     if (avatar.startsWith('/uploads/')) {
       const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
-      return `${baseUrl}${avatar}`;
+      // Add cache busting query parameter
+      return `${baseUrl}${avatar}?t=${Date.now()}`;
     }
     return avatar;
   };

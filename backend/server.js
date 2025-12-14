@@ -20,27 +20,42 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   'https://smarthubz.vercel.app',
   'https://smarthubz.vercel.app/',
-  'http://localhost:3000'
+  'https://www.smarthubz.vercel.app',
+  'https://www.smarthubz.vercel.app/',
+  'http://localhost:3000',
+  'http://localhost:3001'
 ];
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    console.log(`📍 CORS Check - Origin: ${origin || 'no origin'}`);
     
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      console.log('✅ Allowing request with no origin');
+      return callback(null, true);
+    }
+    
+    const originNormalized = origin.replace(/\/$/, '');
     const isAllowed = allowedOrigins.some(allowedOrigin => {
-      return origin === allowedOrigin || origin === allowedOrigin.replace(/\/$/, '');
+      if (!allowedOrigin) return false;
+      const normalizedAllowed = allowedOrigin.replace(/\/$/, '');
+      return originNormalized === normalizedAllowed;
     });
     
     if (isAllowed) {
+      console.log('✅ CORS allowed for origin:', origin);
       callback(null, true);
     } else {
+      console.error('❌ CORS blocked for origin:', origin);
+      console.error('📋 Allowed origins:', allowedOrigins.filter(o => o));
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 }));
 app.use(express.json());
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
