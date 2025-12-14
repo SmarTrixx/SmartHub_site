@@ -160,6 +160,15 @@ const AdminProfile = () => {
     }
   };
 
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return null;
+    if (avatar.startsWith('/uploads/')) {
+      const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+      return `${baseUrl}${avatar}`;
+    }
+    return avatar;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
@@ -268,9 +277,12 @@ const AdminProfile = () => {
             <div className="flex items-center gap-6">
               {profile?.avatar && !avatar && (
                 <img
-                  src={profile.avatar}
+                  src={getAvatarUrl(profile.avatar)}
                   alt="Profile"
                   className="w-24 h-24 rounded-full object-cover border-4 border-[#0057FF]"
+                  onError={(e) => {
+                    e.target.src = '/images/portfolio4.png';
+                  }}
                 />
               )}
               {avatar && (
@@ -567,16 +579,38 @@ const AdminProfile = () => {
               <div className="space-y-4">
                 <h3 className="font-semibold text-[#22223B]">Current Team ({teamMembers.length})</h3>
                 {teamMembers.map((member, idx) => (
-                  <div key={idx} className="bg-gray-50 p-4 rounded-lg flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-[#22223B]">{member.name}</h4>
-                      <p className="text-sm text-gray-600">{member.role}</p>
-                      <p className="text-sm text-gray-600 mt-1">{member.bio}</p>
+                  <div key={idx} className="bg-gray-50 p-4 rounded-lg flex justify-between items-start gap-4">
+                    <div className="flex-1 flex gap-4">
+                      <div>
+                        {teamAvatarPreviews[idx] && (
+                          <img src={teamAvatarPreviews[idx]} alt={member.name} className="w-12 h-12 rounded-full object-cover" />
+                        )}
+                        {!teamAvatarPreviews[idx] && member.avatar && (
+                          <img 
+                            src={getAvatarUrl(member.avatar)} 
+                            alt={member.name} 
+                            className="w-12 h-12 rounded-full object-cover"
+                            onError={(e) => {
+                              e.target.src = '/images/portfolio4.png';
+                            }}
+                          />
+                        )}
+                        {!teamAvatarPreviews[idx] && !member.avatar && (
+                          <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
+                            {member.name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-[#22223B]">{member.name}</h4>
+                        <p className="text-sm text-gray-600">{member.role}</p>
+                        <p className="text-sm text-gray-600 mt-1">{member.bio}</p>
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeTeamMember(idx)}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-all text-sm"
+                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-all text-sm flex-shrink-0"
                     >
                       Remove
                     </button>
