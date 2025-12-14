@@ -176,16 +176,23 @@ app.use('/api/', (req, res, next) => {
     '/auth/setup',      // Allow setup to run and wait for DB if needed
     '/auth/login',      // Allow login attempts - DB will either connect or fail
     '/auth/register',   // Allow register attempts
-    '/auth/verify'      // Allow verification
+    '/auth/verify',     // Allow verification
+    '/auth'             // Allow all /api/auth/* routes
   ];
   
-  if (allowedWithoutDB.some(path => req.path === path || req.path.startsWith(path))) {
+  // Check if the current path (without /api prefix) matches an allowed path
+  const pathWithoutApi = req.path; // req.path is everything after /api/
+  const isAllowed = allowedWithoutDB.some(allowedPath => {
+    return pathWithoutApi === allowedPath || pathWithoutApi.startsWith(allowedPath + '/') || pathWithoutApi.startsWith(allowedPath);
+  });
+  
+  if (isAllowed) {
     return next();
   }
   
   // For other routes, check if MongoDB is connected
   if (mongoose.connection.readyState !== 1) {
-    console.warn(`⚠️ Attempted ${req.method} ${req.path} but MongoDB not connected. State: ${mongoose.connection.readyState}`);
+    console.warn(`⚠️ Attempted ${req.method} /api${req.path} but MongoDB not connected. State: ${mongoose.connection.readyState}`);
     return res.status(503).json({ 
       message: 'Database connection not available',
       error: 'MongoDB is not connected. Please check your connection string.'

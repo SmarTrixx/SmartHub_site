@@ -8,6 +8,14 @@ import { auth } from '../middleware/auth.js';
 const router = express.Router();
 
 // Setup - Create default admin if none exists
+router.get('/setup', async (req, res) => {
+  res.json({ 
+    message: 'Setup endpoint - use POST to create default admin',
+    method: 'POST',
+    endpoint: '/api/auth/setup'
+  });
+});
+
 router.post('/setup', async (req, res) => {
   try {
     // Wait for MongoDB to connect (up to 30 seconds)
