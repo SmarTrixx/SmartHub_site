@@ -1,11 +1,25 @@
 import axios from 'axios';
 
-// Ensure API_BASE_URL is properly formatted without trailing slashes
-let apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Determine API URL based on environment
+let apiUrl;
+
+if (process.env.REACT_APP_API_URL) {
+  // Use environment variable if set
+  apiUrl = process.env.REACT_APP_API_URL;
+} else if (process.env.NODE_ENV === 'production') {
+  // Production: use backend domain
+  apiUrl = 'https://smarthubzbackend.vercel.app/api';
+} else {
+  // Development: use localhost
+  apiUrl = 'http://localhost:5000/api';
+}
+
 // Remove trailing slash if present
 apiUrl = apiUrl.replace(/\/$/, '');
 
 const API_BASE_URL = apiUrl;
+
+console.log('🔗 API Base URL:', API_BASE_URL);
 
 // Create axios instance with default config
 const api = axios.create({
