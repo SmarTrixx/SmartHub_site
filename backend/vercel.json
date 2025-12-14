@@ -1,5 +1,18 @@
 {
   "version": 2,
-  "installCommand": "npm install",
-  "buildCommand": "echo 'Build skipped - using Node.js runtime'"
+  "builds": [
+    {
+      "src": "dev.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "dev.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
