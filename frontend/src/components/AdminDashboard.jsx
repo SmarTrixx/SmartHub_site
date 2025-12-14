@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMenu, FiX, FiLogOut, FiHome, FiImage, FiUser, FiTool } from 'react-icons/fi';
-import axios from 'axios';
+import { authAPI } from '../services/api';
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();
@@ -23,21 +23,19 @@ const AdminDashboard = ({ children }) => {
     }
 
     // Verify token is still valid
-    verifyToken(token);
-  }, [navigate, verifyToken]);
+    const verifyToken = async () => {
+      try {
+        await authAPI.verify();
+      } catch (error) {
+        // Token invalid or expired
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        navigate('/admin/login');
+      }
+    };
 
-  const verifyToken = async (token) => {
-    try {
-      await axios.get(`${process.env.REACT_APP_API_URL}/auth/verify`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    } catch (error) {
-      // Token invalid or expired
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminUser');
-      navigate('/admin/login');
-    }
-  };
+    verifyToken();
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
