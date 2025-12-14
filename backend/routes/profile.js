@@ -2,7 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import Profile from '../models/Profile.js';
 import { auth } from '../middleware/auth.js';
-import upload, { uploadToCloudinary } from '../middleware/upload.js';
+import upload, { fileToDataUrl } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -73,22 +73,9 @@ router.put('/',
       // Handle avatar file
       const avatarFile = req.files?.find(f => f.fieldname === 'avatar');
       if (avatarFile) {
-        try {
-          let avatarUrl;
-          if (process.env.VERCEL || process.env.CLOUDINARY_CLOUD_NAME) {
-            // Upload to Cloudinary on production/Vercel
-            avatarUrl = await uploadToCloudinary(avatarFile);
-            console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
-          } else {
-            // Use local path in development
-            avatarUrl = `/uploads/${avatarFile.filename}`;
-            console.log('📁 Avatar saved locally:', avatarUrl);
-          }
-          profile.avatar = avatarUrl;
-        } catch (err) {
-          console.error('❌ Error uploading avatar:', err);
-          return res.status(400).json({ message: 'Failed to upload avatar: ' + err.message });
-        }
+        const avatarUrl = fileToDataUrl(avatarFile);
+        profile.avatar = avatarUrl;
+        console.log('✅ Avatar saved:', avatarUrl ? '(base64 in DB)' : 'FAILED');
       }
 
       // Update social links
@@ -114,24 +101,11 @@ router.put('/',
         // Map team avatar files to the correct team members
         for (const [idx, member] of parsedTeam.entries()) {
           const avatarFile = req.files?.find(f => f.fieldname === `teamAvatar_${idx}`);
-          console.log(`[Team Update] Member ${idx} (${member.name}): Looking for teamAvatar_${idx}, found: ${avatarFile ? avatarFile.filename : 'NO FILE'}`);
+          console.log(`[Team Update] Member ${idx} (${member.name}): Looking for teamAvatar_${idx}, found: ${avatarFile ? 'YES' : 'NO'}`);
           if (avatarFile) {
-            try {
-              let avatarUrl;
-              if (process.env.VERCEL || process.env.CLOUDINARY_CLOUD_NAME) {
-                // Upload to Cloudinary on production/Vercel
-                avatarUrl = await uploadToCloudinary(avatarFile);
-                console.log(`✅ Team member ${idx} avatar uploaded to Cloudinary:`, avatarUrl);
-              } else {
-                // Use local path in development
-                avatarUrl = `/uploads/${avatarFile.filename}`;
-                console.log(`📁 Team member ${idx} avatar saved locally:`, avatarUrl);
-              }
-              member.avatar = avatarUrl;
-            } catch (err) {
-              console.error(`❌ Error uploading team member ${idx} avatar:`, err);
-              return res.status(400).json({ message: `Failed to upload avatar for ${member.name}: ` + err.message });
-            }
+            const avatarUrl = fileToDataUrl(avatarFile);
+            member.avatar = avatarUrl;
+            console.log(`✅ Team member ${idx} avatar saved (base64 in DB)`);
           }
           // Remove the temporary _fileIndex marker
           delete member._fileIndex;

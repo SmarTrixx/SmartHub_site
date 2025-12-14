@@ -2,7 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import Project from '../models/Project.js';
 import { auth } from '../middleware/auth.js';
-import upload, { uploadToCloudinary } from '../middleware/upload.js';
+import upload, { fileToDataUrl } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -103,22 +103,9 @@ router.post('/',
         return res.status(400).json({ message: 'Project ID already exists' });
       }
 
-      // Upload images - use Cloudinary on production/Vercel
-      let imagePaths;
-      try {
-        if (process.env.VERCEL || process.env.CLOUDINARY_CLOUD_NAME) {
-          // Upload to Cloudinary on production/Vercel
-          imagePaths = await Promise.all(req.files.map(file => uploadToCloudinary(file)));
-          console.log('✅ Project images uploaded to Cloudinary');
-        } else {
-          // Use local paths in development
-          imagePaths = req.files.map(file => `/uploads/${file.filename}`);
-          console.log('📁 Project images saved locally');
-        }
-      } catch (err) {
-        console.error('❌ Error uploading project images:', err);
-        return res.status(400).json({ message: 'Failed to upload images: ' + err.message });
-      }
+      // Convert images to data URLs (base64 stored in DB)
+      const imagePaths = req.files.map(file => fileToDataUrl(file));
+      console.log('✅ Project images converted to base64, storing in DB');
 
       const newProject = new Project({
         id,
@@ -195,9 +182,10 @@ router.put('/:projectId',
 
       // Update images if new ones provided
       if (req.files && req.files.length > 0) {
-        const newImages = req.files.map(file => `/uploads/${file.filename}`);
+        const newImages = req.files.map(file => fileToDataUrl(file));
         project.images = newImages;
         project.image = newImages[0];
+        console.log('✅ Project images updated to base64, storing in DB');
       }
 
       await project.save();
