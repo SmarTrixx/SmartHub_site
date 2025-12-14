@@ -20,6 +20,12 @@ router.get('/', async (req, res) => {
       await profile.save();
     }
 
+    console.log('📤 Profile returned to frontend:', {
+      name: profile.name,
+      socialLinks: profile.socialLinks,
+      stats: profile.stats
+    });
+
     res.json(profile);
   } catch (error) {
     console.error('Error fetching profile:', error);

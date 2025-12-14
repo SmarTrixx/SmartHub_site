@@ -52,6 +52,9 @@ const AdminProfile = () => {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/profile`);
       setProfile(response.data);
       
+      console.log('📥 Profile loaded from API:', response.data);
+      console.log('📥 Social links from API:', response.data.socialLinks);
+      
       // Ensure all social links are initialized
       const socialLinks = {
         twitter: '',
@@ -64,6 +67,8 @@ const AdminProfile = () => {
         Object.assign(socialLinks, response.data.socialLinks);
       }
       
+      console.log('✅ Social links after merge:', socialLinks);
+      
       // Ensure all stats are initialized
       const stats = {
         projectsCompleted: 0,
@@ -74,7 +79,7 @@ const AdminProfile = () => {
         Object.assign(stats, response.data.stats);
       }
       
-      setFormData({
+      const newFormData = {
         name: response.data.name || '',
         title: response.data.title || '',
         bio: response.data.bio || '',
@@ -87,7 +92,10 @@ const AdminProfile = () => {
         availableTime: response.data.availableTime || '',
         socialLinks: socialLinks,
         stats: stats
-      });
+      };
+      
+      console.log('✅ Final formData to set:', newFormData);
+      setFormData(newFormData);
       setTeamMembers(response.data.team || []);
       setLoading(false);
     } catch (error) {
