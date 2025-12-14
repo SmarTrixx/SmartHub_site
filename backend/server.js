@@ -203,6 +203,14 @@ app.use('/api/', (req, res, next) => {
 
 // Routes
 console.log('🔧 Mounting routes...');
+console.log('📊 Route objects:', {
+  authRoutes: typeof authRoutes,
+  projectRoutes: typeof projectRoutes,
+  profileRoutes: typeof profileRoutes,
+  serviceRoutes: typeof serviceRoutes,
+  contactRoutes: typeof contactRoutes
+});
+
 app.use('/api/auth', authRoutes);
 console.log('✓ /api/auth mounted');
 app.use('/api/projects', projectRoutes);
@@ -356,6 +364,7 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
+  console.warn(`⚠️ 404 - ${req.method} ${req.path} - no route matched`);
   res.status(404).json({ message: 'Route not found' });
 });
 
