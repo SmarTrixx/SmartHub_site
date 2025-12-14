@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiAlertCircle } from 'react-icons/fi';
-import axios from 'axios';
+import { authAPI } from '../services/api';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, formData);
+      const response = await authAPI.login(formData);
       
       // Store token in localStorage
       localStorage.setItem('adminToken', response.data.token);

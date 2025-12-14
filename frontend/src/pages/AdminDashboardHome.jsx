@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiImage, FiTool, FiUser, FiArrowRight } from 'react-icons/fi';
-import axios from 'axios';
+import api, { projectsAPI, servicesAPI, profileAPI } from '../services/api';
 import AdminDashboard from '../components/AdminDashboard';
 
 const AdminDashboardHome = () => {
@@ -11,6 +11,8 @@ const AdminDashboardHome = () => {
     services: 0,
     profile: null
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchStats();
@@ -18,23 +20,31 @@ const AdminDashboardHome = () => {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
+      setLoading(true);
+      setError(null);
       
       const [projectsRes, servicesRes, profileRes] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_URL}/projects`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get(`${process.env.REACT_APP_API_URL}/services`),
-        axios.get(`${process.env.REACT_APP_API_URL}/profile`)
+        projectsAPI.getAll(),
+        servicesAPI.getAll(),
+        profileAPI.get()
       ]);
 
       setStats({
-        projects: projectsRes.data.projects?.length || 0,
-        services: servicesRes.data.length || 0,
+        projects: projectsRes.data?.projects?.length || projectsRes.data?.length || 0,
+        services: servicesRes.data?.length || 0,
         profile: profileRes.data
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setError(error.message);
+      // Set default values so page doesn't appear broken
+      setStats({
+        projects: 0,
+        services: 0,
+        profile: null
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,44 +72,70 @@ const AdminDashboardHome = () => {
   return (
     <AdminDashboard>
       <div className="space-y-8">
-        {/* Welcome Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="text-4xl font-bold text-[#22223B]">Welcome to Admin Panel</h1>
-          <p className="text-gray-600 mt-2">
-            {stats.profile?.name && `Hello, ${stats.profile.name}!`} Manage your portfolio and content from here.
-          </p>
-        </motion.div>
+        {/* Loading State */}
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-center py-12"
+          >
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0057FF]"></div>
+          </motion.div>
+        )}
 
-        {/* Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <StatCard
-            icon={FiImage}
-            title="Projects"
-            value={stats.projects}
-            description="Portfolio projects"
-            link="/admin/projects"
-            bgColor="bg-gradient-to-br from-[#0057FF] to-blue-700"
-          />
-          <StatCard
-            icon={FiTool}
-            title="Services"
-            value={stats.services}
-            description="Service offerings"
-            link="/admin/services"
-            bgColor="bg-gradient-to-br from-cyan-600 to-cyan-800"
-          />
-          <StatCard
-            icon={FiUser}
-            title="Profile"
-            value="✓"
-            description="Your profile info"
-            link="/admin/profile"
-            bgColor="bg-gradient-to-br from-purple-600 to-purple-800"
-          />
-        </div>
+        {/* Error State */}
+        {error && !loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
+          >
+            <p>Error loading dashboard: {error}</p>
+          </motion.div>
+        )}
+
+        {!loading && (
+          <>
+            {/* Welcome Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h1 className="text-4xl font-bold text-[#22223B]">Welcome to Admin Panel</h1>
+              <p className="text-gray-600 mt-2">
+                {stats.profile?.name ? `Hello, ${stats.profile.name}!` : 'Manage your portfolio and content from here.'}
+              </p>
+            </motion.div>
+
+            {/* Stats Grid */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <StatCard
+                icon={FiImage}
+                title="Projects"
+                value={stats.projects}
+                description="Portfolio projects"
+                link="/admin/projects"
+                bgColor="bg-gradient-to-br from-[#0057FF] to-blue-700"
+              />
+              <StatCard
+                icon={FiTool}
+                title="Services"
+                value={stats.services}
+                description="Service offerings"
+                link="/admin/services"
+                bgColor="bg-gradient-to-br from-cyan-600 to-cyan-800"
+              />
+              <StatCard
+                icon={FiUser}
+                title="Profile"
+                value="✓"
+                description="Your profile info"
+                link="/admin/profile"
+                bgColor="bg-gradient-to-br from-purple-600 to-purple-800"
+              />
+            </div>
+          </>
+        )}
 
         {/* Quick Actions */}
         <motion.div
