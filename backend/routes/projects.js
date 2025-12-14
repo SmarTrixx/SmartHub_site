@@ -2,7 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import Project from '../models/Project.js';
 import { auth } from '../middleware/auth.js';
-import upload from '../middleware/upload.js';
+import upload, { uploadToCloudinary } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -103,8 +103,22 @@ router.post('/',
         return res.status(400).json({ message: 'Project ID already exists' });
       }
 
-      // Get image paths
-      const imagePaths = req.files.map(file => `/uploads/${file.filename}`);
+      // Upload images - use Cloudinary on production/Vercel
+      let imagePaths;
+      try {
+        if (process.env.VERCEL || process.env.CLOUDINARY_CLOUD_NAME) {
+          // Upload to Cloudinary on production/Vercel
+          imagePaths = await Promise.all(req.files.map(file => uploadToCloudinary(file)));
+          console.log('✅ Project images uploaded to Cloudinary');
+        } else {
+          // Use local paths in development
+          imagePaths = req.files.map(file => `/uploads/${file.filename}`);
+          console.log('📁 Project images saved locally');
+        }
+      } catch (err) {
+        console.error('❌ Error uploading project images:', err);
+        return res.status(400).json({ message: 'Failed to upload images: ' + err.message });
+      }
 
       const newProject = new Project({
         id,
@@ -131,7 +145,7 @@ router.post('/',
       });
     } catch (error) {
       console.error('Error creating project:', error);
-      res.status(500).json({ message: 'Error creating project' });
+      res.status(500).json({ message: 'Error creating project', error: error.message });
     }
   }
 );

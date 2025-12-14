@@ -505,7 +505,7 @@ const AdminProfile = () => {
                   <input
                     type="url"
                     name={social}
-                    value={formData.socialLinks[social]}
+                    value={formData.socialLinks[social] || ''}
                     onChange={handleSocialChange}
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                     placeholder={`https://${social}.com/yourprofile`}
