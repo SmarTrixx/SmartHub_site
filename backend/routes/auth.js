@@ -7,6 +7,21 @@ import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Root endpoint for /api/auth
+router.get('/', (req, res) => {
+  res.json({
+    message: 'Auth API',
+    endpoints: [
+      'GET /setup - Check setup status',
+      'POST /setup - Create default admin',
+      'POST /login - Login with credentials',
+      'POST /register - Register new admin',
+      'GET /verify - Verify token',
+      'POST /logout - Logout'
+    ]
+  });
+});
+
 // Setup - Create default admin if none exists
 router.get('/setup', async (req, res) => {
   res.json({ 

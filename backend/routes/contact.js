@@ -4,6 +4,16 @@ import { body, validationResult } from 'express-validator';
 
 const router = express.Router();
 
+// Root endpoint for /api/contact
+router.get('/', (req, res) => {
+  res.json({
+    message: 'Contact API',
+    endpoints: [
+      'POST /submit - Submit contact form'
+    ]
+  });
+});
+
 // Create transporter function that will be called lazily
 let transporter = null;
 
