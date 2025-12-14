@@ -77,22 +77,30 @@ const connectToMongoDB = async () => {
   connectionAttempts++;
   console.log(`\n📍 Connection attempt ${connectionAttempts}...`);
   
+  // Create a promise that rejects after timeout
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Connection timeout after 35 seconds'));
+    }, 35000);
+  });
+
   try {
-    await mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 45000,
-      socketTimeoutMS: 75000,
-      connectTimeoutMS: 45000,
-      maxPoolSize: 10,
+    const connectionPromise = mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 35000,
+      socketTimeoutMS: 65000,
+      connectTimeoutMS: 35000,
+      maxPoolSize: 3,
       minPoolSize: 0,
-      maxIdleTimeMS: 120000,
+      maxIdleTimeMS: 45000,
       family: 4,
       retryWrites: true,
       w: 'majority',
       authSource: 'admin',
-      compressors: 'snappy,zlib',
-      keepAlive: true,
-      keepAliveInitialDelay: 300000
+      compressors: 'snappy,zlib'
     });
+
+    // Race between connection and timeout
+    await Promise.race([connectionPromise, timeoutPromise]);
     
     mongoDBConnected = true;
     lastConnectionError = null;
