@@ -169,8 +169,17 @@ import contactRoutes from './routes/contact.js';
 
 // Middleware to check MongoDB connection for API routes
 app.use('/api/', (req, res, next) => {
-  // Allow health check and diagnostic endpoints even without DB
-  if (req.path === '/health' || req.path === '/diagnose') {
+  // Allow these endpoints even during cold start/connection issues
+  const allowedWithoutDB = [
+    '/health',
+    '/diagnose',
+    '/auth/setup',      // Allow setup to run and wait for DB if needed
+    '/auth/login',      // Allow login attempts - DB will either connect or fail
+    '/auth/register',   // Allow register attempts
+    '/auth/verify'      // Allow verification
+  ];
+  
+  if (allowedWithoutDB.some(path => req.path === path || req.path.startsWith(path))) {
     return next();
   }
   

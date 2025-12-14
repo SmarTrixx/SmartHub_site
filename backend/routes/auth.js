@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import Admin from '../models/Admin.js';
@@ -9,6 +10,21 @@ const router = express.Router();
 // Setup - Create default admin if none exists
 router.post('/setup', async (req, res) => {
   try {
+    // Wait for MongoDB to connect (up to 30 seconds)
+    let attempts = 0;
+    while (attempts < 30 && mongoose.connection.readyState !== 1) {
+      console.log(`⏳ Waiting for MongoDB... (attempt ${attempts + 1}/30)`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      attempts++;
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        message: 'MongoDB connection timeout',
+        error: 'Could not establish MongoDB connection after 30 seconds'
+      });
+    }
+
     // Check if any admin exists
     const existingAdmin = await Admin.findOne();
     if (existingAdmin) {
