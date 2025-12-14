@@ -195,11 +195,17 @@ app.use('/api/', (req, res, next) => {
 });
 
 // Routes
+console.log('🔧 Mounting routes...');
 app.use('/api/auth', authRoutes);
+console.log('✓ /api/auth mounted');
 app.use('/api/projects', projectRoutes);
+console.log('✓ /api/projects mounted');
 app.use('/api/profile', profileRoutes);
+console.log('✓ /api/profile mounted');
 app.use('/api/services', serviceRoutes);
+console.log('✓ /api/services mounted');
 app.use('/api/contact', contactRoutes);
+console.log('✓ /api/contact mounted');
 
 // Root endpoint
 app.get('/', (req, res) => {
