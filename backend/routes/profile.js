@@ -64,6 +64,8 @@ router.put('/',
         mission, values, team, stats, socialLinks, workAvailability, availableTime
       } = req.body;
 
+      console.log('[Profile Update] Received socialLinks:', socialLinks, 'Type:', typeof socialLinks);
+
       // Update basic info
       if (name) profile.name = name;
       if (title) profile.title = title;
@@ -84,12 +86,23 @@ router.put('/',
         console.log('✅ Avatar saved:', avatarUrl ? '(base64 in DB)' : 'FAILED');
       }
 
-      // Update social links
+      // Update social links - parse if it's a JSON string
       if (socialLinks) {
+        let parsedSocialLinks = socialLinks;
+        if (typeof socialLinks === 'string') {
+          try {
+            parsedSocialLinks = JSON.parse(socialLinks);
+            console.log('[Profile Update] Parsed socialLinks from JSON:', parsedSocialLinks);
+          } catch (err) {
+            console.error('[Profile Update] Failed to parse socialLinks:', err);
+            parsedSocialLinks = socialLinks;
+          }
+        }
         profile.socialLinks = {
           ...profile.socialLinks,
-          ...socialLinks
+          ...parsedSocialLinks
         };
+        console.log('[Profile Update] Final socialLinks saved to DB:', profile.socialLinks);
       }
 
       // Update values
