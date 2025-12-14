@@ -168,7 +168,7 @@ import serviceRoutes from './routes/services.js';
 import contactRoutes from './routes/contact.js';
 
 // Middleware to check MongoDB connection for API routes
-app.use('/api/', (req, res, next) => {
+app.use('/api/', async (req, res, next) => {
   // Allow these endpoints even during cold start/connection issues
   const allowedWithoutDB = [
     '/health',
@@ -190,14 +190,28 @@ app.use('/api/', (req, res, next) => {
     return next();
   }
   
-  // For other routes, check if MongoDB is connected
+  // For other routes, wait for MongoDB to connect (up to 10 seconds)
   if (mongoose.connection.readyState !== 1) {
-    console.warn(`⚠️ Attempted ${req.method} /api${req.path} but MongoDB not connected. State: ${mongoose.connection.readyState}`);
-    return res.status(503).json({ 
-      message: 'Database connection not available',
-      error: 'MongoDB is not connected. Please check your connection string.'
-    });
+    console.log(`⏳ Waiting for MongoDB to connect for ${req.method} /api${req.path}...`);
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    while (attempts < maxAttempts && mongoose.connection.readyState !== 1) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      attempts++;
+    }
+    
+    if (mongoose.connection.readyState !== 1) {
+      console.warn(`❌ MongoDB still not connected after ${maxAttempts} seconds for ${req.method} /api${req.path}`);
+      return res.status(503).json({ 
+        message: 'Database connection not available',
+        error: 'MongoDB is not connected. Please check your connection string.'
+      });
+    }
+    
+    console.log(`✅ MongoDB connected! Proceeding with ${req.method} /api${req.path}`);
   }
+  
   next();
 });
 
