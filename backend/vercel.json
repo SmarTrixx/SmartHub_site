@@ -1,11 +1,5 @@
 {
   "version": 2,
   "installCommand": "npm install",
-  "buildCommand": "",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api"
-    }
-  ]
+  "buildCommand": "echo 'Build skipped - using Node.js runtime'"
 }
