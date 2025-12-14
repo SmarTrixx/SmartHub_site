@@ -4,12 +4,64 @@ import { FiPlus, FiEdit2, FiTrash2, FiCheckCircle, FiAlertCircle, FiImage } from
 import axios from 'axios';
 import AdminDashboard from '../components/AdminDashboard';
 
+// WebP compression utility with lossless option
+const compressImageToWebP = (file, quality = 0.85, lossless = true) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // Resize if too large (max 1600px for portfolio quality)
+        let width = img.width;
+        let height = img.height;
+        const maxSize = 1600;
+
+        if (width > maxSize || height > maxSize) {
+          const ratio = Math.min(maxSize / width, maxSize / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webp'), {
+              type: 'image/webp',
+              lastModified: Date.now(),
+            });
+            const ratio = ((1 - compressedFile.size / file.size) * 100).toFixed(1);
+            const compressionType = lossless ? 'lossless' : `lossy (${(quality * 100).toFixed(0)}%)`;
+            console.log(`🎨 Image compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB (${ratio}% reduction, ${compressionType})`);
+            resolve(compressedFile);
+          },
+          'image/webp',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+  });
+};
+
 const AdminProjects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [message, setMessage] = useState('');
+  const [compressionSettings, setCompressionSettings] = useState({
+    enabled: true,
+    lossless: true,
+    quality: 0.85
+  });
   const [formData, setFormData] = useState({
     id: '',
     title: '',
@@ -51,12 +103,34 @@ const AdminProjects = () => {
     }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, ...files]
-    }));
+    
+    if (compressionSettings.enabled) {
+      try {
+        const compressedFiles = await Promise.all(
+          files.map(file => 
+            compressImageToWebP(file, compressionSettings.quality, compressionSettings.lossless)
+          )
+        );
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...compressedFiles]
+        }));
+      } catch (error) {
+        console.error('Error compressing images:', error);
+        // Fall back to original files if compression fails
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...files]
+        }));
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...files]
+      }));
+    }
   };
 
   const removeImage = (index) => {
@@ -335,6 +409,67 @@ const AdminProjects = () => {
                 />
               </div>
 
+              {/* Image Compression Settings */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <input
+                    type="checkbox"
+                    id="compressionEnabled"
+                    checked={compressionSettings.enabled}
+                    onChange={(e) => setCompressionSettings(prev => ({
+                      ...prev,
+                      enabled: e.target.checked
+                    }))}
+                    className="w-4 h-4 cursor-pointer"
+                  />
+                  <label htmlFor="compressionEnabled" className="cursor-pointer font-semibold text-[#22223B]">
+                    🎨 Compress images to WebP (lossless)
+                  </label>
+                </div>
+                
+                {compressionSettings.enabled && (
+                  <div className="ml-7 space-y-3 text-sm text-gray-700">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="losslessMode"
+                        checked={compressionSettings.lossless}
+                        onChange={(e) => setCompressionSettings(prev => ({
+                          ...prev,
+                          lossless: e.target.checked,
+                          quality: e.target.checked ? 1 : 0.85
+                        }))}
+                        className="w-4 h-4 cursor-pointer"
+                      />
+                      <label htmlFor="losslessMode" className="cursor-pointer">
+                        Lossless (best quality, ~30% smaller)
+                      </label>
+                    </div>
+                    
+                    {!compressionSettings.lossless && (
+                      <div className="ml-7">
+                        <label className="block mb-1">Quality: {(compressionSettings.quality * 100).toFixed(0)}%</label>
+                        <input
+                          type="range"
+                          min="50"
+                          max="95"
+                          step="5"
+                          value={compressionSettings.quality * 100}
+                          onChange={(e) => setCompressionSettings(prev => ({
+                            ...prev,
+                            quality: parseInt(e.target.value) / 100
+                          }))}
+                          className="w-full"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Lower = smaller files, Higher = better quality</p>
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-blue-700 mt-2">💡 Compression happens when you select images. Maximum width/height will be 1600px to maintain quality.</p>
+                  </div>
+                )}
+              </div>
+
               {/* Image Upload */}
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                 <FiImage className="mx-auto mb-2 text-gray-400" size={32} />
@@ -349,7 +484,7 @@ const AdminProjects = () => {
                 <label htmlFor="images" className="cursor-pointer text-[#0057FF] font-semibold hover:underline">
                   Click to upload images or drag and drop
                 </label>
-                <p className="text-sm text-gray-500 mt-2">PNG, JPG, GIF up to 10MB</p>
+                <p className="text-sm text-gray-500 mt-2">{compressionSettings.enabled ? 'WebP compressed' : 'Original files'} - up to 10MB each</p>
 
                 {formData.images.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
