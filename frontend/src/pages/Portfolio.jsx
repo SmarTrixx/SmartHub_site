@@ -197,7 +197,7 @@ const Portfolio = () => {
                 >
                   <div className="relative overflow-hidden">
                     {(() => {
-                      let imageUrl = item.image || '/images/placeholder.jpg';
+                      let imageUrl = item.image || '/android-chrome-512x512.png';
                       if (item.images && Array.isArray(item.images) && item.images.length > 0) {
                         imageUrl = item.images[0];
                       }
@@ -214,7 +214,7 @@ const Portfolio = () => {
                           className="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
                           onError={(e) => {
-                            e.target.src = '/images/placeholder.jpg';
+                            e.target.src = '/android-chrome-512x512.png';
                           }}
                         />
                       );
@@ -288,7 +288,7 @@ const Portfolio = () => {
             <div className="max-w-5xl mx-auto px-6 py-12 bg-gradient-to-br from-[#ffffFF]/30 to-cyan-100 rounded-[3rem] shadow-2xl border border-[#0057FF]/10">
               <div className="flex flex-col md:flex-row items-center gap-8">
                 {(() => {
-                  let avatarUrl = profile?.avatar || "/images/portfolio4.png";
+                  let avatarUrl = profile?.avatar || "/android-chrome-512x512.png";
                   // Add API URL prefix for uploaded images
                   if (avatarUrl.startsWith('/uploads/')) {
                     const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
@@ -297,31 +297,31 @@ const Portfolio = () => {
                   return (
                     <img
                       src={avatarUrl}
-                      alt={profile?.name || "Yusuf Tunde"}
+                      alt={profile?.name || "Smarthubz Studio"}
                       className="w-40 h-40 rounded-full border-4 border-[#0057FF] shadow-lg object-cover"
                       onError={(e) => {
-                        e.target.src = '/images/portfolio4.png';
+                        e.target.src = '/android-chrome-512x512.png';
                       }}
                     />
                   );
                 })()}
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-3xl font-extrabold text-[#0057FF] mb-2">{profile?.name || 'Yusuf Tunde'}</h3>
+                  <h3 className="text-3xl font-extrabold text-[#0057FF] mb-2">{profile?.name || 'Smarthubz Studio'}</h3>
                   <p className="text-lg font-semibold text-gray-700 mb-1">{profile?.title || 'Full Stack Developer & Designer'}</p>
                   <p className="text-gray-600 mb-4">
-                    {profile?.bio || "I'm passionate about building creative solutions for real-world problems."}<br />
+                    {profile?.bio || "We are passionate about building creative solutions for real-world problems."}<br />
                     Let's connect and collaborate!
                   </p>
                   <div className="flex justify-center md:justify-start gap-4 mt-2">
-                    <a href={profile?.email ? `mailto:${profile.email}` : "mailto:your@email.com"} target="_blank" rel="noopener noreferrer"
+                    <a href={profile?.email ? `mailto:${profile.email}` : "mailto:smarthubzstudio@gmail.com"} target="_blank" rel="noopener noreferrer"
                       className="bg-white rounded-full p-3 shadow hover:bg-[#0057FF]/10 transition-colors">
                       <FiMail className="text-[#0057FF] text-2xl" />
                     </a>
-                    <a href={profile?.socialLinks?.github || "https://github.com/your-github-id"} target="_blank" rel="noopener noreferrer"
+                    <a href={profile?.socialLinks?.github || "https://github.com/smartrixx"} target="_blank" rel="noopener noreferrer"
                       className="bg-white rounded-full p-3 shadow hover:bg-[#0057FF]/10 transition-colors">
                       <FiGithub className="text-[#0057FF] text-2xl" />
                     </a>
-                    <a href={profile?.socialLinks?.linkedin || "https://linkedin.com/in/your-linkedin-id"} target="_blank" rel="noopener noreferrer"
+                    <a href={profile?.socialLinks?.linkedin || "https://linkedin.com/in/tunde-yusuf"} target="_blank" rel="noopener noreferrer"
                       className="bg-white rounded-full p-3 shadow hover:bg-[#0057FF]/10 transition-colors">
                       <FiLinkedin className="text-[#0057FF] text-2xl" />
                     </a>
@@ -362,7 +362,7 @@ const Portfolio = () => {
                   <div className="rounded-xl overflow-hidden">
                     <img
                       src={(() => {
-                        let imageUrl = selectedItem.image || '/images/placeholder.jpg';
+                        let imageUrl = selectedItem.image || '/android-chrome-512x512.png';
                         if (imageUrl.startsWith('/uploads/')) {
                           const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
                           imageUrl = `${baseUrl}${imageUrl}`;
@@ -372,7 +372,7 @@ const Portfolio = () => {
                       alt={selectedItem.title}
                       className="w-full h-auto object-cover"
                       onError={(e) => {
-                        e.target.src = '/images/placeholder.jpg';
+                        e.target.src = '/android-chrome-512x512.png';
                       }}
                     />
                   </div>

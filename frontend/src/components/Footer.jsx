@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+// import { AiFillTikTok } from "react-icons/ai";
+import { FaTiktok } from "react-icons/fa";
 import { 
   FiGithub, 
   FiLinkedin, 
@@ -24,7 +26,7 @@ const Footer = () => {
   const [socialLinks, setSocialLinks] = useState([
     {
       icon: <FiMail className="text-xl" />,
-      url: "mailto:yuzuphbahbahtundey007@gmail.com",
+      url: "mailto:smarthubzstudio@gmail.com",
       label: "Email",
       color: "bg-rose-100 text-rose-600"
     },
@@ -42,16 +44,22 @@ const Footer = () => {
     },
     {
       icon: <FiTwitter className="text-xl" />,
-      url: "https://twitter.com/smarthub",
+      url: "https://twitter.com/smarthubz_studio",
       label: "Twitter",
       color: "bg-sky-100 text-sky-600"
     },
     {
       icon: <FiInstagram className="text-xl" />,
-      url: "https://instagram.com/smarthub",
+      url: "https://instagram.com/smarthubz.studio",
       label: "Instagram",
       color: "bg-pink-100 text-pink-600"
-    }
+    },
+    {
+      icon: <FaTiktok className="text-xl" />,
+      url: "https://www.tiktok.com/@smarthubzstudio",
+      label: "TikTok",
+      color: "bg-black text-white"
+    } 
   ]);
 
   useEffect(() => {
@@ -75,7 +83,7 @@ const Footer = () => {
           // Email - always show
           updatedSocials.push({
             icon: <FiMail className="text-xl" />,
-            url: `mailto:${response.data.email || 'hello@example.com'}`,
+            url: `mailto:${response.data.email || 'smarthubzstudio@gmail.com'}`,
             label: "Email",
             color: "bg-rose-100 text-rose-600"
           });
@@ -110,6 +118,14 @@ const Footer = () => {
             url: links.instagram || "https://instagram.com/smarthub",
             label: "Instagram",
             color: "bg-pink-100 text-pink-600"
+          });
+
+          // TikTok - use DB value or fallback
+          updatedSocials.push({
+            icon: <FaTiktok className="text-xl" />,
+            url: links.tiktok || "https://www.tiktok.com/@smarthubzstudio",
+            label: "TikTok",
+            color: "bg-black text-white"
           });
           
           setSocialLinks(updatedSocials);
@@ -148,11 +164,11 @@ const Footer = () => {
               <div className="w-13 h-13 rounded-full flex items-center justify-center">
                 <img 
                   src="/images/smartlogo2.png" 
-                  alt="Sm@rtHub Logo" 
+                  alt="Smarthubz Studio Logo" 
                   className="w-13 h-8 "
                 />
               </div>
-              <span className="font-bold text-lg text-[#0057FF]">Sm@rtHub</span>
+              <span className="font-bold text-lg text-[#0057FF]">Smarthubz Studio</span>
             </div>
             <p className="text-gray-800 text-md">
               Building innovative solutions for the digital world.
@@ -218,7 +234,7 @@ const Footer = () => {
             <form className="flex gap-2">
               <input 
                 type="email" 
-                placeholder="Your email" 
+                placeholder="Your Email" 
                 className="flex-1 px-3 py-2 text-md border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF] focus:border-transparent"
                 required
               />
@@ -235,7 +251,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-gray-200 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-gray-800 text-md">
-            © {currentYear} <span className="font-bold text-[#0057FF]">Sm@rtHub</span>. All rights reserved.
+            © {currentYear} <span className="font-bold text-[#0057FF]">Smarthubz Studio</span>. All rights reserved.
           </div>
           
           <div className="flex items-center gap-4">

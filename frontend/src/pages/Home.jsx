@@ -28,7 +28,14 @@ const defaultServices = [
   },
 ];
 
-const brandVariants = ["Smm@rtHub", "Smm@rtDesign", "Smm@rTrix", "Smm@rtDev"];
+const defaultStats = {
+  projectsCompleted: 50,
+  clientsSatisfied: 30,
+  yearsExperience: 5,
+};
+
+
+const brandVariants = ["Smmarthubz Studio", "Smm@rtDesign", "Smm@rtDev"];
 
 const Home = () => {
   const [heroIdx, setHeroIdx] = useState(0);
@@ -37,7 +44,7 @@ const Home = () => {
   const [brandIdx, setBrandIdx] = useState(0);
   const [services, setServices] = useState(defaultServices);
   const [projects, setProjects] = useState([]);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState(defaultStats);
   const [, setLoading] = useState(true);
 
   useEffect(() => {

@@ -11,15 +11,15 @@ const defaultStats = [
 
 const defaultTeam = [
   {
-    name: "Jane Doe",
-    role: "Founder & Lead Developer",
-    avatar: "/images/portfolio4.png",
+    name: "Yusuf Tunde S.",
+    role: "Founder & Director",
+    avatar: "/android-chrome-512x512.png",
     bio: "Passionate about building digital solutions that make a difference.",
   },
   {
-    name: "John Smith",
+    name: "Smarthubz Studio",
     role: "Creative Director",
-    avatar: "/images/portfolio4.png",
+    avatar: "/android-chrome-512x512.png",
     bio: "Designing brands that stand out and connect with audiences.",
   },
 ];
@@ -94,7 +94,7 @@ const About = () => {
           </span>
         </h1>
         <p className="max-w-2xl mx-auto text-lg font-bold text-gray-700 text-center">
-          Sm@rtHub Digital is a creative agency focused on delivering innovative
+          Smarthubz Studio is a digital and creative agency focused on delivering innovative
           digital solutions for modern brands. We blend technology, design, and
           strategy to help businesses grow, automate, and stand out in a crowded
           digital world.
@@ -173,12 +173,12 @@ const About = () => {
                     const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
                     imageUrl = `${baseUrl}${imageUrl}`;
                   }
-                  return imageUrl || '/images/portfolio4.png';
+                  return imageUrl || '/android-chrome-512x512.png';
                 })()}
                 alt={member.name}
                 className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-[#0057FF]/20 shadow"
                 onError={(e) => {
-                  e.target.src = '/images/portfolio4.png';
+                  e.target.src = '/android-chrome-512x512.png';
                 }}
               />
               <h3 className="font-bold text-xl text-[#22223B] mb-1">

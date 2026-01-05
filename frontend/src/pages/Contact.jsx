@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiSend, FiMapPin, FiPhone, FiMail, FiCheckCircle, FiAlertCircle, FiTwitter, FiFacebook, FiInstagram, FiLinkedin } from 'react-icons/fi';
+import { FaTiktok } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 
@@ -10,16 +11,17 @@ const Contact = () => {
     message: ''
   });
   const [contactInfo, setContactInfo] = useState({
-    email: 'hello@example.com',
+    email: 'contact.smarthubz@gmail.com',
     phone: '+234 903 922 3824',
     location: 'Nigeria',
     workAvailability: 'Available',
     availableTime: 'Sat-Sun, 24hrs',
     socialLinks: {
-      twitter: 'https://twitter.com',
+      twitter: 'https://twitter.com/smarthubz_studio',
       facebook: 'https://facebook.com',
-      instagram: 'https://instagram.com',
-      linkedin: 'https://linkedin.com'
+      instagram: 'https://instagram.com/smarthubz.studio',
+      linkedin: 'https://linkedin.com',
+      tiktok: 'https://www.tiktok.com/@smarthubzstudio'
     }
   });
   const [errors, setErrors] = useState({});
@@ -44,7 +46,8 @@ const Contact = () => {
               twitter: links.twitter || "https://twitter.com",
               facebook: links.facebook || "https://facebook.com",
               instagram: links.instagram || "https://instagram.com",
-              linkedin: links.linkedin || "https://linkedin.com"
+              linkedin: links.linkedin || "https://linkedin.com",
+              tiktok: links.tiktok || "https://www.tiktok.com/@smarthubzstudio"
             }
           }));
         }
@@ -306,6 +309,9 @@ const Contact = () => {
                 </a>
                 <a href={contactInfo.socialLinks?.linkedin} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="LinkedIn">
                   <FiLinkedin className="text-2xl" />
+                </a>
+                <a href={contactInfo.socialLinks?.tiktok} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#0057FF] hover:text-white hover:scale-105 transition-all duration-300" aria-label="TikTok">
+                  <FaTiktok className="text-2xl" />
                 </a>
               </div>
             </div>            {/* Map Placeholder */}

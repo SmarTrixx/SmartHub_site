@@ -60,7 +60,7 @@ const AdminDashboard = ({ children }) => {
         className="fixed md:relative w-64 h-screen bg-[#22223B] text-white shadow-lg z-50"
       >
         <div className="p-6 border-b border-white/10">
-          <h2 className="text-2xl font-bold">Sm@rtHub</h2>
+          <h2 className="text-2xl font-bold">Smarthubz Studio</h2>
           <p className="text-sm text-gray-400">Admin Panel</p>
         </div>
 

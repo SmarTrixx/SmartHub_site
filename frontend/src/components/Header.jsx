@@ -60,7 +60,7 @@ const Header = () => {
             className="inline text-transparent bg-clip-text bg-gradient-to-r from-black to-blue-400 text-base sm:text-lg md:text-xl"
 
           >
-            Sm@rtHub
+            Smarthubz
           </motion.span>
         </Link>
 
