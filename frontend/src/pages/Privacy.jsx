@@ -21,7 +21,7 @@ const Privacy = () => {
             Privacy & Policy
           </h1>
           <p className="max-w-2xl mx-auto text-gray-700 text-lg">
-            This Privacy Policy explains how Sm@rtHub collects, uses, discloses,
+            This Privacy Policy explains how Smarthubz collects, uses, discloses,
             and protects your information when you visit our website.
           </p>
         </header>
@@ -35,7 +35,7 @@ const Privacy = () => {
 
             <h2 id="overview">Overview</h2>
             <p>
-              Sm@rtHub ("we", "us", "our") respects your privacy. We collect
+              Smarthubz ("we", "us", "our") respects your privacy. We collect
               information to provide and improve our services, communicate with
               you, and to keep the site secure. We aim to be transparent about
               the information we collect and how it is used.
@@ -135,7 +135,7 @@ const Privacy = () => {
         {/* Quick links / small footer-ish card */}
         <footer className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-gray-700">
-            © {new Date().getFullYear()} <span className="font-bold text-[#0057FF]">Sm@rtHub</span>. All rights reserved.
+            © {new Date().getFullYear()} <span className="font-bold text-[#0057FF]">Smarthubz</span>. All rights reserved.
           </div>
           <nav className="flex gap-4">
             <Link to="/terms" className="text-gray-700 hover:text-[#0057FF]">Terms</Link>

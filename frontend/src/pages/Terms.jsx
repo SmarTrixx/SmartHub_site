@@ -24,7 +24,7 @@ const Terms = () => {
             Terms of Service
           </h1>
           <p className="max-w-2xl mx-auto text-gray-700 text-lg">
-            These Terms of Service govern your use of Sm@rtHub's website and
+            These Terms of Service govern your use of Smarthubz's website and
             services. Please read them carefully before using the site.
           </p>
         </header>
@@ -40,7 +40,7 @@ const Terms = () => {
 
           <h2 id="services">2. Services</h2>
           <p>
-            Sm@rtHub provides digital services (design, development, automation,
+            Smarthubz provides digital services (design, development, automation,
             support) as described on the site. Specific projects are governed by
             separate project agreements or proposals where applicable.
           </p>
@@ -49,13 +49,13 @@ const Terms = () => {
           <ul>
             <li>Provide accurate information when contacting or contracting us.</li>
             <li>Use the site lawfully and do not attempt to disrupt or abuse services.</li>
-            <li>Respect intellectual property rights of Sm@rtHub and third parties.</li>
+            <li>Respect intellectual property rights of Smarthubz and third parties.</li>
           </ul>
 
           <h2 id="intellectual-property">4. Intellectual Property</h2>
           <p>
             All site content, branding, designs and code remain the property of
-            Sm@rtHub or its licensors, except where rights are transferred in a
+            Smarthubz or its licensors, except where rights are transferred in a
             separate agreement. You may not reproduce or use our copyrighted
             material without permission.
           </p>
@@ -69,7 +69,7 @@ const Terms = () => {
 
           <h2 id="third-parties">6. Third-party Links & Services</h2>
           <p>
-            The site may link to third-party services. Sm@rtHub is not
+            The site may link to third-party services. Smarthubz is not
             responsible for third-party policies or practices. Use them at your
             own risk.
           </p>
@@ -104,7 +104,7 @@ const Terms = () => {
           <h2 id="governing-law">11. Governing Law</h2>
           <p>
             These Terms are governed by the laws of the jurisdiction where
-            Sm@rtHub is incorporated, without regard to conflict of law rules.
+            Smarthubz is incorporated, without regard to conflict of law rules.
           </p>
 
           <h2 id="contact">12. Contact</h2>
@@ -117,7 +117,7 @@ const Terms = () => {
 
         <footer className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-gray-700">
-            © {new Date().getFullYear()} <span className="font-bold text-[#0057FF]">Sm@rtHub</span>. All rights reserved.
+            © {new Date().getFullYear()} <span className="font-bold text-[#0057FF]">Smarthubz</span>. All rights reserved.
           </div>
           <nav className="flex gap-4">
             <Link to="/privacy" className="text-gray-700 hover:text-[#0057FF]">Privacy</Link>
