@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiCheckCircle, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
@@ -88,7 +88,6 @@ const ProjectRequest = () => {
     projectScope: '',
     techStack: '',
     timeline: '',
-    budget: '',
     // Tech Support specific
     issueDescription: '',
     systemDetails: '',
@@ -176,7 +175,6 @@ const ProjectRequest = () => {
     }
 
     setLoading(true);
-    const token = localStorage.getItem('adminToken');
 
     try {
       const formDataObj = new FormData();
@@ -275,6 +273,8 @@ const ProjectRequest = () => {
       case 'Tech Support':
         data.issueDescription = formData.issueDescription;
         data.systemDetails = formData.systemDetails;
+        break;
+      default:
         break;
     }
     return data;
@@ -851,7 +851,6 @@ const ProjectRequest = () => {
               </button>
             </motion.div>
           )}
-        </div>
       </div>
     </div>
   );
