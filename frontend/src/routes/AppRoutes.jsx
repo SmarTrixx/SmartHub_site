@@ -13,6 +13,7 @@ import AdminDashboardHome from '../pages/AdminDashboardHome';
 import AdminProjects from '../pages/AdminProjects';
 import AdminProfile from '../pages/AdminProfile';
 import AdminServices from '../pages/AdminServices';
+import AdminServiceRequests from '../pages/AdminServiceRequests';
 
 const AppRoutes = () => (
   <Routes>
@@ -33,6 +34,7 @@ const AppRoutes = () => (
     <Route path="/admin/projects" element={<AdminProjects />} />
     <Route path="/admin/profile" element={<AdminProfile />} />
     <Route path="/admin/services" element={<AdminServices />} />
+    <Route path="/admin/service-requests" element={<AdminServiceRequests />} />
   </Routes>
 );
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiMenu, FiX, FiLogOut, FiHome, FiImage, FiUser, FiTool } from 'react-icons/fi';
+import { FiMenu, FiX, FiLogOut, FiHome, FiImage, FiUser, FiTool, FiMail } from 'react-icons/fi';
 import { authAPI } from '../services/api';
 
 const AdminDashboard = ({ children }) => {
@@ -47,7 +47,8 @@ const AdminDashboard = ({ children }) => {
     { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
     { icon: FiImage, label: 'Projects', path: '/admin/projects' },
     { icon: FiUser, label: 'Profile', path: '/admin/profile' },
-    { icon: FiTool, label: 'Services', path: '/admin/services' }
+    { icon: FiTool, label: 'Services', path: '/admin/services' },
+    { icon: FiMail, label: 'Service Requests', path: '/admin/service-requests' }
   ];
 
   return (
