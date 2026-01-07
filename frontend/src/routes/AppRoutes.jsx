@@ -4,6 +4,7 @@ import Services from '../pages/Services';
 import Portfolio from '../pages/Portfolio';
 import ProjectDetail from '../pages/ProjectDetail';
 import Contact from '../pages/Contact';
+import ProjectRequest from '../pages/ProjectRequest';
 import About from '../pages/About';
 import Privacy from '../pages/Privacy';
 import Terms from '../pages/Terms';
@@ -21,6 +22,7 @@ const AppRoutes = () => (
     <Route path="/portfolio" element={<Portfolio />} />
     <Route path="/portfolio/:projectId" element={<ProjectDetail />} />
     <Route path="/contact" element={<Contact />} />
+    <Route path="/project-request" element={<ProjectRequest />} />
     <Route path="/about" element={<About />} />
     <Route path="/privacy" element={<Privacy />} />
     <Route path="/terms" element={<Terms />} />

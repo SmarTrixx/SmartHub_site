@@ -181,6 +181,7 @@ import projectRoutes from './routes/projects.js';
 import profileRoutes from './routes/profile.js';
 import serviceRoutes from './routes/services.js';
 import contactRoutes from './routes/contact.js';
+import serviceRequestRoutes from './routes/serviceRequests.js';
 
 // Middleware to check MongoDB connection for API routes
 app.use('/api/', async (req, res, next) => {
@@ -250,6 +251,8 @@ app.use('/api/services', serviceRoutes);
 console.log('✓ /api/services mounted');
 app.use('/api/contact', contactRoutes);
 console.log('✓ /api/contact mounted');
+app.use('/api/service-requests', serviceRequestRoutes);
+console.log('✓ /api/service-requests mounted');
 
 // Root endpoint
 app.get('/', (req, res) => {
