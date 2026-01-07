@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiCheckCircle, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 
 // Image compression utility (shared with admin)
 const compressImageToWebP = (file, quality = 0.85, lossless = true) => {
@@ -50,8 +49,22 @@ const compressImageToWebP = (file, quality = 0.85, lossless = true) => {
 };
 
 const ProjectRequest = () => {
-  const [step, setStep] = useState('service'); // service, form, success
-  const [selectedService, setSelectedService] = useState('');
+  const [searchParams] = useSearchParams();
+  const serviceParam = searchParams.get('service');
+  
+  // Map URL param to service name
+  const serviceMap = {
+    'graphics': 'Graphics Design',
+    'software': 'Software Development',
+    'branding': 'Branding & Identity',
+    'automation': 'Automation',
+    'tech-support': 'Tech Support'
+  };
+  
+  const preselectedService = serviceParam ? serviceMap[serviceParam] : '';
+  
+  const [step, setStep] = useState(preselectedService ? 'form' : 'service'); // Skip service selection if preloaded
+  const [selectedService, setSelectedService] = useState(preselectedService);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState([]);
@@ -595,10 +608,8 @@ const ProjectRequest = () => {
   };
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pt-20 pb-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pt-20 pb-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Step 1: Service Selection */}
           {step === 'service' && (
             <motion.div
@@ -842,8 +853,7 @@ const ProjectRequest = () => {
           )}
         </div>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 };
 

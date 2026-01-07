@@ -324,7 +324,7 @@ const ProjectDetail = () => {
               Interested in a similar project? Let's bring your ideas to life!
             </p>
             <Link
-              to="/project-request"
+              to="/services"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#0057FF] to-cyan-600 text-white font-bold rounded-full hover:shadow-lg transition-all hover:scale-105"
             >
               Start Your Project

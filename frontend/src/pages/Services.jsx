@@ -3,6 +3,19 @@ import { services as defaultServices } from "../data/services";
 import { Link } from "react-router-dom";
 import axios from 'axios';
 
+// Map service title to URL parameter
+const getServiceParam = (serviceTitle) => {
+  const paramMap = {
+    'Graphics Design': 'graphics',
+    'Web Development': 'software',
+    'Software Development': 'software',
+    'Branding & Identity': 'branding',
+    'Automation': 'automation',
+    'Tech Support': 'tech-support'
+  };
+  return paramMap[serviceTitle] || 'graphics';
+};
+
 const Services = () => {
   const [services, setServices] = useState(defaultServices);
   const [loading, setLoading] = useState(true);
@@ -83,14 +96,14 @@ const Services = () => {
                   {s.title}
                 </h3>
                 <p className="text-gray-600">{s.description}</p>
-                <div className="mt-6">
+                <div className="mt-6 flex gap-3">
                   <Link
-                    to="/project-request"
-                    className="inline-flex items-center text-[#0057FF] font-medium group-hover:underline"
+                    to={`/project-request?service=${getServiceParam(s.title)}`}
+                    className="flex-1 inline-flex items-center justify-center text-[#0057FF] font-medium hover:underline text-sm"
                   >
                     Get Started
                     <svg
-                      className="ml-1 w-5 h-5 transition-transform group-hover:translate-x-1"
+                      className="ml-1 w-4 h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -103,6 +116,15 @@ const Services = () => {
                       ></path>
                     </svg>
                   </Link>
+                  <a
+                    href={`https://wa.me/2349039223824?text=${encodeURIComponent(`Hello Smarthubz Team, I'd like to start a project. I'm interested in ${s.title}. Please let me know the next steps.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-2 bg-[#25D366] text-white rounded hover:bg-[#128C7E] transition-colors text-sm font-medium"
+                    title="Chat on WhatsApp"
+                  >
+                    💬
+                  </a>
                 </div>
               </div>
             </div>
