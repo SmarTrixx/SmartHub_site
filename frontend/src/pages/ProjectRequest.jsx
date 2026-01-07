@@ -294,7 +294,7 @@ const ProjectRequest = () => {
                   value={formData.projectType}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 >
                   <option value="">Select project type</option>
                   <option value="Logo Design">Logo Design</option>
@@ -313,7 +313,7 @@ const ProjectRequest = () => {
                   value={formData.deadline}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
             </div>
@@ -340,7 +340,7 @@ const ProjectRequest = () => {
                   value={formData.targetAudience}
                   onChange={handleChange}
                   placeholder="e.g., Young professionals, Tech enthusiasts"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
               <div>
@@ -351,7 +351,7 @@ const ProjectRequest = () => {
                   value={formData.preferredStyles}
                   onChange={handleChange}
                   placeholder="e.g., Modern, Minimalist, Retro"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
             </div>
@@ -378,7 +378,7 @@ const ProjectRequest = () => {
                   value={formData.typographyPrefs}
                   onChange={handleChange}
                   placeholder="e.g., Sans-serif, Bold, Contemporary"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
             </div>
@@ -392,7 +392,7 @@ const ProjectRequest = () => {
                   value={formData.dimensions}
                   onChange={handleChange}
                   placeholder="e.g., 1200x800px, A4, Square"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
               <div>
@@ -402,8 +402,8 @@ const ProjectRequest = () => {
                   name="budget"
                   value={formData.budget}
                   onChange={handleChange}
-                  placeholder="e.g., $500-$1000"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  placeholder="e.g., ₦5000 - ₦10000"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
             </div>
@@ -422,7 +422,7 @@ const ProjectRequest = () => {
                 placeholder="Describe what you want to build..."
                 required
                 rows="4"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
@@ -435,7 +435,7 @@ const ProjectRequest = () => {
                   value={formData.techStack}
                   onChange={handleChange}
                   placeholder="e.g., React, Node.js, MongoDB"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
               <div>
@@ -446,7 +446,7 @@ const ProjectRequest = () => {
                   value={formData.timeline}
                   onChange={handleChange}
                   placeholder="e.g., 2-3 months"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
             </div>
@@ -459,7 +459,7 @@ const ProjectRequest = () => {
                 value={formData.budget}
                 onChange={handleChange}
                 placeholder="e.g., $5000-$10000"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
           </div>
@@ -477,7 +477,7 @@ const ProjectRequest = () => {
                 placeholder="Tell us about your business..."
                 required
                 rows="4"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
@@ -489,7 +489,7 @@ const ProjectRequest = () => {
                 value={formData.brandValues}
                 onChange={handleChange}
                 placeholder="e.g., Innovation, Trust, Quality"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
@@ -501,7 +501,7 @@ const ProjectRequest = () => {
                 value={formData.targetMarket}
                 onChange={handleChange}
                 placeholder="e.g., Startups, Enterprise, SMBs"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
@@ -513,7 +513,7 @@ const ProjectRequest = () => {
                 value={formData.budget}
                 onChange={handleChange}
                 placeholder="e.g., $2000-$5000"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
           </div>
@@ -531,7 +531,7 @@ const ProjectRequest = () => {
                 placeholder="Describe the process you want to automate..."
                 required
                 rows="4"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
@@ -543,7 +543,7 @@ const ProjectRequest = () => {
                 value={formData.currentTools}
                 onChange={handleChange}
                 placeholder="e.g., Google Sheets, Zapier, Excel"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
@@ -555,7 +555,7 @@ const ProjectRequest = () => {
                 onChange={handleChange}
                 placeholder="What do you want to achieve?"
                 rows="3"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
@@ -567,7 +567,7 @@ const ProjectRequest = () => {
                 value={formData.budget}
                 onChange={handleChange}
                 placeholder="e.g., $500-$2000"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
           </div>
@@ -585,7 +585,7 @@ const ProjectRequest = () => {
                 placeholder="Describe the technical issue or support you need..."
                 required
                 rows="4"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
@@ -597,7 +597,7 @@ const ProjectRequest = () => {
                 onChange={handleChange}
                 placeholder="OS, software versions, environment details..."
                 rows="3"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
           </div>
@@ -624,7 +624,7 @@ const ProjectRequest = () => {
                 ← Back to Services
               </button>
 
-              <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+              <div className="bg-white rounded-[2.5rem] shadow-lg p-8 mb-8">
                 <h2 className="text-3xl font-bold text-[#22223B] mb-8">
                   {services.find(s => s.id === selectedService)?.icon} {selectedService} Request
                 </h2>
@@ -633,7 +633,7 @@ const ProjectRequest = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className={`p-4 rounded-lg mb-6 flex items-center gap-3 ${
+                    className={`p-4 rounded-[2.5rem] mb-6 flex items-center gap-3 ${
                       message.type === 'success'
                         ? 'bg-green-100/50 text-green-700 border border-green-300'
                         : 'bg-red-100/50 text-red-700 border border-red-300'
@@ -661,7 +661,7 @@ const ProjectRequest = () => {
                           value={formData.clientName}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                           placeholder="Your name"
                         />
                       </div>
@@ -673,7 +673,7 @@ const ProjectRequest = () => {
                           value={formData.clientEmail}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                           placeholder="your@email.com"
                         />
                       </div>
@@ -684,7 +684,7 @@ const ProjectRequest = () => {
                           name="clientPhone"
                           value={formData.clientPhone}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                           placeholder="Your phone number"
                         />
                       </div>
@@ -712,7 +712,7 @@ const ProjectRequest = () => {
                       <label htmlFor="attachments" className="cursor-pointer text-[#0057FF] font-semibold hover:underline">
                         Click to upload reference images
                       </label>
-                      <p className="text-sm text-gray-500 mt-2">Compressed to WebP format</p>
+                      <p className="text-sm text-gray-500 mt-2">Upload closely related sample images only.</p>
                     </div>
 
                     {attachedFiles.length > 0 && (
@@ -724,12 +724,12 @@ const ProjectRequest = () => {
                               <img
                                 src={URL.createObjectURL(file)}
                                 alt="Preview"
-                                className="w-full h-24 object-cover rounded-lg"
+                                className="w-full h-24 object-cover rounded-[2.5rem]"
                               />
                               <button
                                 type="button"
                                 onClick={() => removeFile(idx)}
-                                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity text-white"
+                                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-[2.5rem] transition-opacity text-white"
                               >
                                 Remove
                               </button>
@@ -752,7 +752,7 @@ const ProjectRequest = () => {
                         required
                       />
                       <span className="text-sm text-gray-700">
-                        I agree to the terms and conditions and understand that Smarthubz will use this information to assess my project and provide an estimate.
+                        I agree to the <a href="/terms" className="text-[#0057FF] hover:underline">terms and conditions</a> and understand that Smarthubz will use this information to assess my project and provide an estimate.
                       </span>
                     </label>
                   </div>
@@ -761,15 +761,16 @@ const ProjectRequest = () => {
                   <div className="flex gap-4">
                     <button
                       type="button"
-                      onClick={() => setStep('service')}
-                      className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-all font-semibold"
+                      onClick={() => navigate('/services')}
+
+                      className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-[2.5rem] hover:border-gray-400 transition-all font-semibold"
                     >
                       Back
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 px-6 py-3 bg-[#0057FF] text-white rounded-lg hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+                      className="flex-1 px-6 py-3 bg-[#0057FF] text-white rounded-[2.5rem] hover:shadow-lg transition-all font-semibold disabled:opacity-50"
                     >
                       {loading ? 'Submitting...' : 'Submit Request'}
                     </button>
@@ -808,7 +809,7 @@ const ProjectRequest = () => {
                   setAttachedFiles([]);
                   setMessage('');
                 }}
-                className="px-8 py-3 bg-[#0057FF] text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+                className="px-8 py-3 bg-[#0057FF] text-white rounded-[2.5rem] hover:shadow-lg transition-all font-semibold"
               >
                 Submit Another Request
               </button>
