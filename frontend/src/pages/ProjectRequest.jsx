@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiCheckCircle, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
-import { useSearchParams } from 'react-router-dom';
+import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 // Image compression utility (shared with admin)
@@ -50,6 +50,7 @@ const compressImageToWebP = (file, quality = 0.85, lossless = true) => {
 
 const ProjectRequest = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const serviceParam = searchParams.get('service');
   
   // Map URL param to service name
@@ -610,53 +611,14 @@ const ProjectRequest = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pt-20 pb-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Step 1: Service Selection */}
-          {step === 'service' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="text-center mb-12">
-                <h1 className="text-4xl md:text-5xl font-bold text-[#22223B] mb-4">
-                  Request a Service
-                </h1>
-                <p className="text-lg text-gray-600">
-                  Choose the service you need and tell us about your project
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4 mb-8">
-                {services.map((service) => (
-                  <motion.button
-                    key={service.id}
-                    whileHover={{ scale: 1.05 }}
-                    onClick={() => {
-                      setSelectedService(service.id);
-                      setStep('form');
-                    }}
-                    className="p-6 text-left border-2 border-gray-200 rounded-lg hover:border-[#0057FF] hover:bg-blue-50 transition-all"
-                  >
-                    <div className="text-4xl mb-2">{service.icon}</div>
-                    <h3 className="text-xl font-bold text-[#22223B] mb-2">{service.title}</h3>
-                    <p className="text-gray-600 text-sm">{service.description}</p>
-                    <div className="flex items-center justify-between mt-4">
-                      <span className="text-[#0057FF] font-semibold">Get Started</span>
-                      <FiArrowRight className="text-[#0057FF]" />
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Step 2: Service Form */}
-          {step === 'form' && (
+          {/* Step 1: Service Form (now main view when service param exists) */}
+          {selectedService && step === 'form' && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <button
-                onClick={() => setStep('service')}
+                onClick={() => navigate('/services')}
                 className="mb-6 text-[#0057FF] font-semibold hover:underline flex items-center gap-2"
               >
                 ← Back to Services
@@ -834,7 +796,8 @@ const ProjectRequest = () => {
               </p>
               <button
                 onClick={() => {
-                  setStep('service');
+                  navigate('/services');
+                  setStep('form');
                   setSelectedService('');
                   setFormData({
                     clientName: '',

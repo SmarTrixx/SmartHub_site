@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiCheckCircle, FiAlertCircle, FiDownload, FiChevronDown } from 'react-icons/fi';
+import { FiCheckCircle, FiAlertCircle, FiChevronDown } from 'react-icons/fi';
 import axios from 'axios';
 import AdminDashboard from '../components/AdminDashboard';
 
@@ -8,7 +8,6 @@ const AdminServiceRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
-  const [selectedRequest, setSelectedRequest] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
 
