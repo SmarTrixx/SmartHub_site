@@ -85,7 +85,7 @@ const Services = () => {
                 <p className="text-gray-600">{s.description}</p>
                 <div className="mt-6">
                   <Link
-                    to="/contact"
+                    to="/project-request"
                     className="inline-flex items-center text-[#0057FF] font-medium group-hover:underline"
                   >
                     Get Started

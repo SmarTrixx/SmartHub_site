@@ -430,10 +430,10 @@ const Home = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/contact"
+                to="/project-request"
                 className="relative overflow-hidden inline-block border-2 text-[#FFFFFF] font-bold px-10 py-4 rounded-full hover:bg-gray-100 text-lg shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
               >
-                Get in Touch
+                Start Your Project
               </Link>
               <a
                 href="https://wa.me/2349039223824"

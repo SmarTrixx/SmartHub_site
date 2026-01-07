@@ -212,10 +212,10 @@ const About = () => {
       {/* CTA Button Only */}
       <div className="flex justify-center">
         <Link
-          to="/contact"
+          to="/project-request"
           className="inline-block bg-[#0057FF] text-white px-10 py-4 rounded-full font-bold hover:bg-blue-700 text-lg shadow transition-all hover:-translate-y-1"
         >
-          Let's Work Together
+          Start Your Project
         </Link>
       </div>
     </div>
