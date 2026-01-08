@@ -13,6 +13,8 @@ const AdminServiceRequests = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [statusMessages, setStatusMessages] = useState({});
+  const [rejectingId, setRejectingId] = useState(null);
+  const [selectedAttachment, setSelectedAttachment] = useState(null);
 
   useEffect(() => {
     fetchRequests();
@@ -37,6 +39,12 @@ const AdminServiceRequests = () => {
   };
 
   const updateRequestStatus = async (requestId, newStatus, statusMessage = '') => {
+    // For rejected status, show custom message field instead of immediate update
+    if (newStatus === 'rejected' && rejectingId !== requestId) {
+      setRejectingId(requestId);
+      return;
+    }
+
     try {
       const token = localStorage.getItem('adminToken');
       const adminMessage = statusMessages[requestId] || '';
@@ -55,17 +63,18 @@ const AdminServiceRequests = () => {
       
       // Show real email status from backend
       if (response.data.emailSent) {
-        setMessage({ type: 'success', text: `Status updated to ${newStatus}. Email notification sent to client.` });
+        setMessage({ type: 'success', text: `Status updated to ${newStatus}. Email sent to client.` });
       } else {
-        setMessage({ type: 'info', text: `Status updated to ${newStatus}. Email notification pending (check logs if not received).` });
+        setMessage({ type: 'warning', text: `Status updated to ${newStatus}. Email delivery status: check Vercel logs.` });
       }
       
       setStatusMessages(prev => ({ ...prev, [requestId]: '' }));
+      setRejectingId(null);
       fetchRequests();
-      setTimeout(() => setMessage(''), 4000);
+      setTimeout(() => setMessage(''), 5000);
     } catch (error) {
       console.error('Error updating status:', error);
-      setMessage({ type: 'error', text: 'Failed to update status' });
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to update status' });
     }
   };
 
@@ -158,6 +167,8 @@ const AdminServiceRequests = () => {
             className={`p-4 rounded-lg flex items-center gap-3 ${
               message.type === 'success'
                 ? 'bg-green-100/50 text-green-700 border border-green-300'
+                : message.type === 'warning'
+                ? 'bg-yellow-100/50 text-yellow-700 border border-yellow-300'
                 : 'bg-red-100/50 text-red-700 border border-red-300'
             }`}
           >
@@ -167,6 +178,42 @@ const AdminServiceRequests = () => {
               <FiAlertCircle size={20} />
             )}
             {message.text}
+          </motion.div>
+        )}
+
+        {/* Image Viewer Modal */}
+        {selectedAttachment && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onClick={() => setSelectedAttachment(null)}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-4xl max-h-screen relative"
+            >
+              {selectedAttachment.dataUrl?.startsWith('data:image') ? (
+                <img
+                  src={selectedAttachment.dataUrl}
+                  alt={selectedAttachment.originalName}
+                  className="max-w-full max-h-screen object-contain rounded-lg"
+                />
+              ) : (
+                <div className="bg-white p-8 rounded-lg">
+                  <p className="text-gray-700 text-lg">File: {selectedAttachment.originalName}</p>
+                  <p className="text-gray-500 mt-4">Non-image files cannot be previewed in browser</p>
+                </div>
+              )}
+              <button
+                onClick={() => setSelectedAttachment(null)}
+                className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-200"
+              >
+                <FiX size={24} />
+              </button>
+            </motion.div>
           </motion.div>
         )}
 
@@ -362,22 +409,34 @@ const AdminServiceRequests = () => {
                     {/* Attachments */}
                     {request.attachments && request.attachments.length > 0 && (
                       <div>
-                        <h4 className="font-bold text-[#22223B] mb-3">Attachments</h4>
+                        <h4 className="font-bold text-[#22223B] mb-3">Attachments (Click to view in full resolution)</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           {request.attachments.map((attachment, idx) => (
-                            <div key={idx} className="space-y-2">
+                            <div
+                              key={idx}
+                              className="space-y-2 cursor-pointer group"
+                              onClick={() => setSelectedAttachment(attachment)}
+                            >
                               {attachment.dataUrl && attachment.dataUrl.startsWith('data:image') ? (
-                                <img
-                                  src={attachment.dataUrl}
-                                  alt={attachment.originalName}
-                                  className="w-full h-24 object-cover rounded border border-gray-300"
-                                />
+                                <div className="relative overflow-hidden rounded border border-gray-300 h-24">
+                                  <img
+                                    src={attachment.dataUrl}
+                                    alt={attachment.originalName}
+                                    className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <span className="text-white text-sm font-semibold">Click to view</span>
+                                  </div>
+                                </div>
                               ) : (
-                                <div className="w-full h-24 bg-gray-300 rounded flex items-center justify-center">
-                                  📎
+                                <div className="w-full h-24 bg-gray-300 rounded flex items-center justify-center group-hover:bg-gray-400 transition-colors">
+                                  <div className="text-center">
+                                    <p className="text-2xl">📎</p>
+                                    <p className="text-xs text-gray-700 mt-1">Click to view</p>
+                                  </div>
                                 </div>
                               )}
-                              <p className="text-xs text-gray-600 truncate">{attachment.originalName}</p>
+                              <p className="text-xs text-gray-600 truncate" title={attachment.originalName}>{attachment.originalName}</p>
                             </div>
                           ))}
                         </div>
@@ -403,9 +462,12 @@ const AdminServiceRequests = () => {
                             <button
                               key={status}
                               onClick={() => updateRequestStatus(request._id, status)}
+                              disabled={rejectingId === request._id && status !== 'rejected'}
                               className={`px-4 py-2 rounded font-semibold transition-all ${
                                 request.status === status
                                   ? 'bg-[#0057FF] text-white'
+                                  : rejectingId === request._id && status !== 'rejected'
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                   : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                               }`}
                             >
@@ -414,29 +476,46 @@ const AdminServiceRequests = () => {
                           ))}
                         </div>
                         
-                        {/* Admin Message for Rejected Status */}
-                        <div>
-                          <label className="block text-sm font-semibold text-[#22223B] mb-2">
-                            {request.status === 'rejected' ? (
-                              <>Custom Message - <span className="text-red-600">REQUIRED FOR REJECTED STATUS</span></>
-                            ) : (
-                              <>Custom Message (Optional - sent to client on status update)</>
-                            )}
-                          </label>
-                          <textarea
-                            value={statusMessages[request._id] || ''}
-                            onChange={(e) => setStatusMessages(prev => ({
-                              ...prev,
-                              [request._id]: e.target.value
-                            }))}
-                            placeholder={request.status === 'rejected' ? 
-                              "e.g., 'We're at capacity. Please resubmit in 3 weeks.' or 'This service is outside our expertise.'" :
-                              "e.g., 'We're reviewing your request and will follow up in 2 days.'"}
-                            rows="3"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                          />
-                          <p className="text-xs text-gray-600 mt-1">This message will be included in the status update email to the client.</p>
-                        </div>
+                        {/* Custom Message Field - Only visible for reject */}
+                        {rejectingId === request._id && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="border-2 border-red-300 bg-red-50 p-4 rounded-lg"
+                          >
+                            <label className="block text-sm font-semibold text-red-700 mb-2">
+                              Custom Rejection Message (REQUIRED)
+                            </label>
+                            <textarea
+                              value={statusMessages[request._id] || ''}
+                              onChange={(e) => setStatusMessages(prev => ({
+                                ...prev,
+                                [request._id]: e.target.value
+                              }))}
+                              placeholder="e.g., 'We're at capacity. Please resubmit in 3 weeks.' or 'This service is outside our expertise.'"
+                              rows="3"
+                              className="w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
+                              autoFocus
+                            />
+                            <p className="text-xs text-red-600 mt-2">This message will be sent to the client explaining why their request was rejected.</p>
+                            <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() => updateRequestStatus(request._id, 'rejected')}
+                                disabled={!statusMessages[request._id]?.trim()}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded font-semibold hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors"
+                              >
+                                Confirm Rejection & Send Email
+                              </button>
+                              <button
+                                onClick={() => setRejectingId(null)}
+                                className="px-4 py-2 bg-gray-300 text-gray-700 rounded font-semibold hover:bg-gray-400 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
                     </div>
 

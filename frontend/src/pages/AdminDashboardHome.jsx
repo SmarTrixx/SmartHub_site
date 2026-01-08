@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiImage, FiTool, FiUser, FiArrowRight } from 'react-icons/fi';
+import { FiImage, FiTool, FiUser, FiArrowRight, FiMail } from 'react-icons/fi';
+import axios from 'axios';
 import api, { projectsAPI, servicesAPI, profileAPI } from '../services/api';
 import AdminDashboard from '../components/AdminDashboard';
 
@@ -23,16 +24,26 @@ const AdminDashboardHome = () => {
       setLoading(true);
       setError(null);
       
-      const [projectsRes, servicesRes, profileRes] = await Promise.all([
+      const token = localStorage.getItem('adminToken');
+      const [projectsRes, servicesRes, profileRes, requestsRes] = await Promise.all([
         projectsAPI.getAll(),
         servicesAPI.getAll(),
-        profileAPI.get()
+        profileAPI.get(),
+        axios.get(
+          `${process.env.REACT_APP_API_URL}/service-requests`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        ).catch(() => ({ data: { requests: [] } }))
       ]);
+
+      const requests = requestsRes.data?.requests || [];
+      const pendingCount = requests.filter(r => r.status === 'pending').length;
 
       setStats({
         projects: projectsRes.data?.projects?.length || projectsRes.data?.length || 0,
         services: servicesRes.data?.length || 0,
-        profile: profileRes.data
+        profile: profileRes.data,
+        totalRequests: requests.length,
+        pendingRequests: pendingCount
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -108,7 +119,7 @@ const AdminDashboardHome = () => {
             </motion.div>
 
             {/* Stats Grid */}
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-4 gap-6">
               <StatCard
                 icon={FiImage}
                 title="Projects"
@@ -132,6 +143,14 @@ const AdminDashboardHome = () => {
                 description="Your profile info"
                 link="/admin/profile"
                 bgColor="bg-gradient-to-br from-purple-600 to-purple-800"
+              />
+              <StatCard
+                icon={FiMail}
+                title="Requests"
+                value={stats.pendingRequests}
+                description={`${stats.totalRequests} total`}
+                link="/admin/service-requests"
+                bgColor="bg-gradient-to-br from-red-600 to-red-800"
               />
             </div>
           </>
