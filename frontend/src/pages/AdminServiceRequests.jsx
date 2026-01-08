@@ -415,31 +415,30 @@ const AdminServiceRequests = () => {
                         </div>
                         
                         {/* Admin Message for Rejected Status */}
-                        {true && (
-                          <div>
-                            <label className="block text-sm font-semibold text-[#22223B] mb-2">
-                              {request.status === 'rejected' ? (
-                                <>Custom Message - <span className="text-red-600">REQUIRED FOR REJECTED STATUS</span></>
-                              ) : (
-                                <>Custom Message (Optional - sent to client on status update)</>
-                              )}
-                            </label>
-                            <textarea
-                              value={statusMessages[request._id] || ''}
-                              onChange={(e) => setStatusMessages(prev => ({
-                                ...prev,
-                                [request._id]: e.target.value
-                              }))}
-                              placeholder={request.status === 'rejected' ? 
-                                "e.g., 'We're at capacity. Please resubmit in 3 weeks.' or 'This service is outside our expertise.'" :
-                                "e.g., 'We're reviewing your request and will follow up in 2 days.'"}
-                              rows="3"
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                            />
-                            <p className="text-xs text-gray-600 mt-1">This message will be included in the status update email to the client.</p>
-                          </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-[#22223B] mb-2">
+                            {request.status === 'rejected' ? (
+                              <>Custom Message - <span className="text-red-600">REQUIRED FOR REJECTED STATUS</span></>
+                            ) : (
+                              <>Custom Message (Optional - sent to client on status update)</>
+                            )}
+                          </label>
+                          <textarea
+                            value={statusMessages[request._id] || ''}
+                            onChange={(e) => setStatusMessages(prev => ({
+                              ...prev,
+                              [request._id]: e.target.value
+                            }))}
+                            placeholder={request.status === 'rejected' ? 
+                              "e.g., 'We're at capacity. Please resubmit in 3 weeks.' or 'This service is outside our expertise.'" :
+                              "e.g., 'We're reviewing your request and will follow up in 2 days.'"}
+                            rows="3"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          />
+                          <p className="text-xs text-gray-600 mt-1">This message will be included in the status update email to the client.</p>
                         </div>
                       </div>
+                    </div>
 
                     {/* Metadata */}
                     <div className="text-xs text-gray-500 border-t pt-4">
