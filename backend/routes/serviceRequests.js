@@ -321,8 +321,6 @@ router.put('/:requestId/status', [
       emailSent: emailSent,
       request
     });
-      request
-    });
   } catch (error) {
     console.error('Error updating status:', error);
     res.status(500).json({ 
