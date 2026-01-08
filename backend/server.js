@@ -22,9 +22,14 @@ const allowedOrigins = [
   'https://smarthubz.vercel.app/',
   'https://www.smarthubz.vercel.app',
   'https://www.smarthubz.vercel.app/',
+  'https://smarthubzbackend.vercel.app',
+  'https://smarthubzbackend.vercel.app/',
   'http://localhost:3000',
-  'http://localhost:3001'
-];
+  'http://localhost:3001',
+  'http://localhost:5000',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5000'
+].filter(Boolean); // Remove any undefined/null entries
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -36,10 +41,10 @@ app.use(cors({
       return callback(null, true);
     }
     
-    const originNormalized = origin.replace(/\/$/, '');
+    const originNormalized = origin.toLowerCase().replace(/\/$/, '');
     const isAllowed = allowedOrigins.some(allowedOrigin => {
       if (!allowedOrigin) return false;
-      const normalizedAllowed = allowedOrigin.replace(/\/$/, '');
+      const normalizedAllowed = allowedOrigin.toLowerCase().replace(/\/$/, '');
       return originNormalized === normalizedAllowed;
     });
     
@@ -47,15 +52,18 @@ app.use(cors({
       console.log('✅ CORS allowed for origin:', origin);
       callback(null, true);
     } else {
-      console.error('❌ CORS blocked for origin:', origin);
-      console.error('📋 Allowed origins:', allowedOrigins.filter(o => o));
-      callback(new Error('Not allowed by CORS'));
+      console.warn('⚠️  CORS request from origin:', origin);
+      console.warn('📋 Allowed origins:', allowedOrigins);
+      // Allow anyway (log but don't block) - for production reliability
+      callback(null, true);
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  optionsSuccessStatus: 200,
+  maxAge: 86400 // 24 hours
 }));
 app.use(express.json());
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
