@@ -105,8 +105,37 @@ export const emailTemplates = {
     `
   }),
 
-  // Service request status update
-  serviceRequestStatusUpdate: (name, referenceId, status, message) => {
+  // Service request admin notification
+  serviceRequestAdminNotification: (clientName, clientEmail, serviceType, referenceId, projectDetails) => ({
+    subject: `New Service Request #${referenceId} - ${serviceType}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 0 auto;">
+        <div style="background: #22223B; color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;">
+          <h2 style="margin: 0; font-size: 18px;">New Service Request Submitted</h2>
+        </div>
+        <div style="background: white; padding: 15px; border-left: 4px solid #0057FF; margin: 15px 0;">
+          <p style="margin: 5px 0;"><strong>Reference ID:</strong> <code style="background: #f5f5f5; padding: 2px 4px; font-family: monospace;">${referenceId}</code></p>
+          <p style="margin: 5px 0;"><strong>Service Type:</strong> ${serviceType}</p>
+          <p style="margin: 5px 0;"><strong>Client Name:</strong> ${clientName}</p>
+          <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${clientEmail}" style="color: #0057FF;">${clientEmail}</a></p>
+        </div>
+        <h3 style="margin: 20px 0 10px 0; color: #22223B;">Project Details:</h3>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; white-space: pre-wrap; font-size: 14px; color: #666; line-height: 1.6; max-height: 200px; overflow-y: auto;">
+          ${projectDetails}
+        </div>
+        <p style="margin-top: 20px; text-align: center;">
+          <a href="${process.env.FRONTEND_URL || 'https://smarthubz.vercel.app'}/admin/service-requests" style="background: #0057FF; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: bold;">
+            Review in Admin Panel
+          </a>
+        </p>
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin-top: 20px;">
+          <p style="margin: 0; color: #856404; font-size: 13px;">
+            <strong>⚠️ Action Required:</strong> This request is waiting for your review and response.
+          </p>
+        </div>
+      </div>
+    `
+  }),
     const statusColors = {
       'pending': '#FFA500',
       'reviewing': '#0057FF',

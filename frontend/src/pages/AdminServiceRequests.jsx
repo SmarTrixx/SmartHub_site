@@ -41,7 +41,7 @@ const AdminServiceRequests = () => {
       const token = localStorage.getItem('adminToken');
       const adminMessage = statusMessages[requestId] || '';
       
-      await axios.put(
+      const response = await axios.put(
         `${process.env.REACT_APP_API_URL}/service-requests/${requestId}/status`,
         { 
           status: newStatus, 
@@ -53,7 +53,13 @@ const AdminServiceRequests = () => {
         }
       );
       
-      setMessage({ type: 'success', text: `Status updated to ${newStatus}. Email sent to client.` });
+      // Show real email status from backend
+      if (response.data.emailSent) {
+        setMessage({ type: 'success', text: `Status updated to ${newStatus}. Email notification sent to client.` });
+      } else {
+        setMessage({ type: 'info', text: `Status updated to ${newStatus}. Email notification pending (check logs if not received).` });
+      }
+      
       setStatusMessages(prev => ({ ...prev, [requestId]: '' }));
       fetchRequests();
       setTimeout(() => setMessage(''), 4000);
@@ -408,20 +414,27 @@ const AdminServiceRequests = () => {
                           ))}
                         </div>
                         
-                        {/* Admin Message for Status Update */}
-                        <div>
-                          <label className="block text-sm font-semibold text-[#22223B] mb-2">
-                            Custom Message (Optional - sent to client on status update)
-                          </label>
-                          <textarea
-                            value={statusMessages[request._id] || ''}
-                            onChange={(e) => setStatusMessages(prev => ({
-                              ...prev,
-                              [request._id]: e.target.value
-                            }))}
-                            placeholder="e.g., 'We're reviewing your request and will follow up in 2 days.' or 'We're at capacity. Please resubmit in 3 weeks.'"
-                            rows="3"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                        {/* Admin Message for Rejected Status */}
+                        {true && (
+                          <div>
+                            <label className="block text-sm font-semibold text-[#22223B] mb-2">
+                              {request.status === 'rejected' ? (
+                                <>Custom Message - <span className="text-red-600">REQUIRED FOR REJECTED STATUS</span></>
+                              ) : (
+                                <>Custom Message (Optional - sent to client on status update)</>
+                              )}
+                            </label>
+                            <textarea
+                              value={statusMessages[request._id] || ''}
+                              onChange={(e) => setStatusMessages(prev => ({
+                                ...prev,
+                                [request._id]: e.target.value
+                              }))}
+                              placeholder={request.status === 'rejected' ? 
+                                "e.g., 'We're at capacity. Please resubmit in 3 weeks.' or 'This service is outside our expertise.'" :
+                                "e.g., 'We're reviewing your request and will follow up in 2 days.'"}
+                              rows="3"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                           />
                           <p className="text-xs text-gray-600 mt-1">This message will be included in the status update email to the client.</p>
                         </div>

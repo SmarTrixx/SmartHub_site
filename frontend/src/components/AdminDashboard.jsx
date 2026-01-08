@@ -57,7 +57,7 @@ const AdminDashboard = ({ children }) => {
     { icon: FiImage, label: 'Projects', path: '/admin/projects' },
     { icon: FiUser, label: 'Profile', path: '/admin/profile' },
     { icon: FiTool, label: 'Services', path: '/admin/services' },
-    { icon: FiMail, label: 'Service Requests', path: '/admin/service-requests' },
+    { icon: FiMail, label: 'Service Requests', path: '/admin/service-requests', badge: true },
     { icon: FiGlobe, label: 'View Website', path: '/' },
     { icon: FiSettings, label: 'Settings', path: '/admin/settings', disabled: true }
   ];

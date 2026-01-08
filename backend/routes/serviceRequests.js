@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 import ServiceRequest from '../models/ServiceRequest.js';
 import upload, { fileToDataUrl } from '../middleware/upload.js';
 import { emailTemplates } from '../utils/emailTemplates.js';
-import { sendEmailAsync } from '../services/emailService.js';
+import { sendEmail } from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -16,6 +16,69 @@ const sanitizeInput = (str) => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
     .trim();
+};
+
+// Email sending with proper logging
+const sendConfirmationEmails = async (serviceRequest, referenceId) => {
+  const clientName = sanitizeInput(serviceRequest.clientName);
+  const clientEmail = serviceRequest.clientEmail;
+  const serviceType = serviceRequest.serviceType;
+  const adminEmail = process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com';
+
+  // Send client confirmation
+  try {
+    const clientTemplate = emailTemplates.serviceRequestConfirmation(
+      clientName,
+      serviceType,
+      referenceId
+    );
+
+    const result = await sendEmail({
+      from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+      to: clientEmail,
+      subject: clientTemplate.subject,
+      html: clientTemplate.html,
+      replyTo: adminEmail
+    });
+
+    if (result.success) {
+      console.log(`✅ CLIENT EMAIL SENT: Service request #${referenceId} confirmation to ${clientEmail}`);
+      serviceRequest.emailSent = true;
+    } else {
+      console.error(`❌ CLIENT EMAIL FAILED: #${referenceId} - ${result.error}`);
+      serviceRequest.emailSent = false;
+    }
+  } catch (error) {
+    console.error(`❌ CLIENT EMAIL EXCEPTION: #${referenceId} - ${error.message}`);
+    serviceRequest.emailSent = false;
+  }
+
+  // Send admin notification
+  try {
+    const adminTemplate = emailTemplates.serviceRequestAdminNotification(
+      clientName,
+      clientEmail,
+      serviceType,
+      referenceId,
+      serviceRequest.projectDetails
+    );
+
+    const result = await sendEmail({
+      from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+      to: adminEmail,
+      subject: adminTemplate.subject,
+      html: adminTemplate.html,
+      replyTo: clientEmail
+    });
+
+    if (result.success) {
+      console.log(`✅ ADMIN EMAIL SENT: New service request #${referenceId} from ${clientName}`);
+    } else {
+      console.error(`❌ ADMIN EMAIL FAILED: #${referenceId} - ${result.error}`);
+    }
+  } catch (error) {
+    console.error(`❌ ADMIN EMAIL EXCEPTION: #${referenceId} - ${error.message}`);
+  }
 };
 
 // Create service request (public)
@@ -62,7 +125,7 @@ router.post('/',
             dataUrl: fileUrl
           });
         });
-        console.log(`✅ Attached ${attachments.length} files to service request`);
+        console.log(`✅ ATTACHMENT: ${attachments.length} file(s) processed for service request`);
       }
 
       // ALWAYS save request first - regardless of email
@@ -79,67 +142,34 @@ router.post('/',
         termsAccepted: termsAccepted === 'true' || termsAccepted === true,
         ipAddress: req.ip,
         userAgent: req.get('user-agent'),
-        emailSent: false // Track if confirmation email was sent
+        emailSent: false,
+        status: 'pending'
       });
 
       await serviceRequest.save();
       const referenceId = serviceRequest._id.toString().substring(0, 8).toUpperCase();
 
-      console.log(`📝 Service request saved: ${serviceType} from ${clientName} (ID: ${referenceId})`);
+      console.log(`✅ REQUEST SAVED: Service request #${referenceId} created - ${serviceType} from ${sanitizeInput(clientName)}`);
 
-      // Send emails asynchronously (non-blocking)
-      const clientTemplate = emailTemplates.serviceRequestConfirmation(
-        sanitizeInput(clientName), 
-        serviceType, 
-        referenceId
-      );
+      // Send emails (blocking, but with structured logging)
+      await sendConfirmationEmails(serviceRequest, referenceId);
 
-      sendEmailAsync({
-        from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
-        to: clientEmail,
-        subject: clientTemplate.subject,
-        html: clientTemplate.html,
-        replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
-      });
+      // Update the saved record with email status
+      await serviceRequest.save();
 
-      // Send admin notification
-      sendEmailAsync({
-        from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
-        to: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com',
-        subject: `New Service Request #${referenceId} - ${serviceType}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
-            <h2 style="color: #0057FF;">New Service Request Submitted</h2>
-            <div style="background: white; padding: 15px; border-left: 4px solid #0057FF; margin: 15px 0;">
-              <p><strong>Reference ID:</strong> <code>${referenceId}</code></p>
-              <p><strong>Service Type:</strong> ${serviceType}</p>
-              <p><strong>Client Name:</strong> ${sanitizeInput(clientName)}</p>
-              <p><strong>Email:</strong> <a href="mailto:${clientEmail}">${clientEmail}</a></p>
-              <p><strong>Phone:</strong> ${clientPhone || 'Not provided'}</p>
-            </div>
-            <h3>Project Details:</h3>
-            <p>${sanitizeInput(projectDetails).replace(/\n/g, '<br>')}</p>
-            <p style="margin-top: 20px;">
-              <a href="${process.env.FRONTEND_URL || 'https://smarthubz.vercel.app'}/admin/service-requests" style="background: #0057FF; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; display: inline-block;">
-                View in Admin Panel
-              </a>
-            </p>
-          </div>
-        `,
-        replyTo: clientEmail
-      });
-
-      // Return success - emails sent async
       res.status(201).json({
         success: true,
         message: 'Service request submitted successfully!',
         requestId: serviceRequest._id,
         referenceId: referenceId,
-        info: 'A confirmation email has been sent to your inbox.'
+        emailSent: serviceRequest.emailSent,
+        info: serviceRequest.emailSent 
+          ? 'A confirmation email has been sent to your inbox.'
+          : 'Your request has been received. You will hear from us shortly.'
       });
 
     } catch (error) {
-      console.error('❌ Error creating service request:', error.message);
+      console.error(`❌ REQUEST CREATION FAILED: ${error.message}`);
       res.status(500).json({ 
         success: false,
         message: 'Error submitting service request. Please try again.'
@@ -152,7 +182,6 @@ router.post('/',
 router.get('/', async (req, res) => {
   try {
     const requests = await ServiceRequest.find()
-      .select('-attachments.dataUrl')
       .sort({ createdAt: -1 });
     
     res.json({
@@ -193,6 +222,16 @@ router.get('/:requestId', async (req, res) => {
 });
 
 // Update service request status (admin only)
+// STRICT RULES: Only specific statuses trigger emails
+const STATUS_EMAIL_RULES = {
+  'pending': false,        // No email
+  'reviewing': true,       // Email, no custom message
+  'approved': true,        // Email, no custom message
+  'in-progress': false,    // No email
+  'completed': true,       // Email, no custom message
+  'rejected': true         // Email, custom message REQUIRED
+};
+
 router.put('/:requestId/status', [
   body('status').isIn(['pending', 'reviewing', 'approved', 'in-progress', 'completed', 'rejected'])
     .withMessage('Invalid status'),
@@ -218,40 +257,70 @@ router.put('/:requestId/status', [
 
     const previousStatus = request.status;
     const newStatus = req.body.status;
+    const referenceId = request._id.toString().substring(0, 8).toUpperCase();
+    let emailSent = false;
 
     // Update status only if changed
     if (previousStatus !== newStatus) {
       request.status = newStatus;
       request.statusUpdatedAt = new Date();
+
+      // Check if email should be sent for this status
+      const shouldSendEmail = STATUS_EMAIL_RULES[newStatus];
+
+      if (shouldSendEmail) {
+        try {
+          // For rejected status, custom message is required
+          if (newStatus === 'rejected' && !req.body.adminMessage) {
+            console.warn(`⚠️ STATUS UPDATE: #${referenceId} - Rejected status without custom message`);
+          }
+
+          const statusTemplate = emailTemplates.serviceRequestStatusUpdate(
+            request.clientName,
+            referenceId,
+            newStatus,
+            req.body.adminMessage || ''
+          );
+
+          const result = await sendEmail({
+            from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+            to: request.clientEmail,
+            subject: statusTemplate.subject,
+            html: statusTemplate.html,
+            replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
+          });
+
+          if (result.success) {
+            console.log(`✅ STATUS EMAIL SENT: #${referenceId} - ${newStatus} status notification to ${request.clientEmail}`);
+            emailSent = true;
+          } else {
+            console.error(`❌ STATUS EMAIL FAILED: #${referenceId} - ${result.error}`);
+            emailSent = false;
+          }
+        } catch (error) {
+          console.error(`❌ STATUS EMAIL EXCEPTION: #${referenceId} - ${error.message}`);
+          emailSent = false;
+        }
+      } else {
+        console.log(`ℹ️ STATUS UPDATE: #${referenceId} - Status changed to ${newStatus} (no email triggered)`);
+      }
+
       await request.save();
-
-      // Send email async
-      const referenceId = request._id.toString().substring(0, 8).toUpperCase();
-      const statusTemplate = emailTemplates.serviceRequestStatusUpdate(
-        request.clientName,
-        referenceId,
-        newStatus,
-        req.body.adminMessage || ''
-      );
-
-      sendEmailAsync({
-        from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
-        to: request.clientEmail,
-        subject: statusTemplate.subject,
-        html: statusTemplate.html,
-        replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
-      });
     }
 
     // Save internal notes if provided
     if (req.body.internalNotes) {
       request.internalNotes = req.body.internalNotes;
       await request.save();
+      console.log(`✅ INTERNAL NOTES: #${referenceId} - Updated`);
     }
 
     res.json({
       success: true,
       message: 'Status updated successfully',
+      emailSent: emailSent,
+      request
+    });
       request
     });
   } catch (error) {
