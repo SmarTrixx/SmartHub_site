@@ -148,23 +148,6 @@ router.post('/',
   }
 );
 
-      console.log(`📝 Service request created: ${serviceType} from ${clientName} (ID: ${referenceId})`);
-
-      res.status(201).json({
-        message: 'Service request submitted successfully',
-        requestId: serviceRequest._id,
-        referenceId: referenceId
-      });
-    } catch (error) {
-      console.error('Error creating service request:', error);
-      res.status(500).json({ 
-        success: false,
-        message: 'Error submitting service request. Please try again.'
-      });
-    }
-  }
-);
-
 // Get all service requests (admin only)
 router.get('/', async (req, res) => {
   try {
