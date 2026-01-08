@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMenu, FiX, FiLogOut, FiHome, FiImage, FiUser, FiTool, FiMail } from 'react-icons/fi';
 import { authAPI } from '../services/api';
+import { sessionManager } from '../services/sessionManager';
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();
@@ -30,16 +31,24 @@ const AdminDashboard = ({ children }) => {
         // Token invalid or expired
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
+        localStorage.removeItem('sessionStartTime');
+        sessionManager.cleanup();
         navigate('/admin/login');
       }
     };
 
     verifyToken();
+
+    return () => {
+      sessionManager.cleanup();
+    };
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
+    localStorage.removeItem('sessionStartTime');
+    sessionManager.cleanup();
     navigate('/admin/login');
   };
 

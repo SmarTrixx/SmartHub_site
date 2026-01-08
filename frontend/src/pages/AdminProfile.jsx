@@ -85,7 +85,8 @@ const AdminProfile = () => {
       github: '',
       linkedin: '',
       instagram: '',
-      facebook: ''
+      facebook: '',
+      tiktok: ''
     },
     stats: {
       projectsCompleted: 0,
@@ -564,7 +565,7 @@ const AdminProfile = () => {
           <div className="border-b pb-8">
             <h2 className="text-xl font-bold text-[#22223B] mb-4">Social Links</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              {['twitter', 'github', 'linkedin', 'instagram', 'facebook'].map((social) => (
+              {['twitter', 'github', 'linkedin', 'instagram', 'facebook', 'tiktok'].map((social) => (
                 <div key={social}>
                   <label className="block text-sm font-semibold text-[#22223B] mb-2 capitalize">{social}</label>
                   <input

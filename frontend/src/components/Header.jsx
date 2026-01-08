@@ -101,7 +101,7 @@ const Header = () => {
           className="hidden md:block"
         >
           <Link
-            to="/contact"
+            to="/services"
             className="px-6 py-3 border-2 border-#5C85F2 bg-[#5C81F7]/100 text-[#ffffff] font-semibold rounded-full hover:bg-gray-100 transition-colors shadow-md hover:shadow-lg"
           >
             Get Started

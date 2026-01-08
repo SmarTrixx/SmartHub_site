@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiAlertCircle } from 'react-icons/fi';
 import { authAPI } from '../services/api';
+import { sessionManager } from '../services/sessionManager';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -26,9 +27,18 @@ const AdminLogin = () => {
     try {
       const response = await authAPI.login(formData);
       
-      // Store token in localStorage
+      // Store token and session data in localStorage
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminUser', JSON.stringify(response.data.admin));
+      localStorage.setItem('sessionStartTime', Date.now().toString());
+      
+      // Initialize session manager
+      sessionManager.init((message) => {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        localStorage.removeItem('sessionStartTime');
+        navigate('/admin/login', { replace: true, state: { message } });
+      });
       
       // Redirect to dashboard
       navigate('/admin/dashboard');

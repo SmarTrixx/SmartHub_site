@@ -53,7 +53,8 @@ const profileSchema = new mongoose.Schema(
       github: { type: String, default: '' },
       linkedin: { type: String, default: '' },
       instagram: { type: String, default: '' },
-      facebook: { type: String, default: '' }
+      facebook: { type: String, default: '' },
+      tiktok: { type: String, default: '' }
     },
     mission: {
       type: String,

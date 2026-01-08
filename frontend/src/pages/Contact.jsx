@@ -99,18 +99,43 @@ const Contact = () => {
           name: formData.name,
           email: formData.email,
           message: formData.message
+        }, {
+          timeout: 15000, // 15 second timeout
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
 
         if (response.data.success) {
           setIsSuccess(true);
           setFormData({ name: '', email: '', message: '' });
-          // Hide success message after 5 seconds
-          setTimeout(() => setIsSuccess(false), 5000);
+          // Hide success message after 7 seconds
+          setTimeout(() => setIsSuccess(false), 7000);
+        } else {
+          setErrors({
+            submit: response.data.message || 'Failed to send message. Please try again.'
+          });
         }
       } catch (error) {
-        console.error('Error sending message:', error);
+        // Handle different error types
+        let errorMessage = 'Failed to send message. Please try again later.';
+        
+        if (error.response?.status === 400) {
+          // Validation error
+          errorMessage = error.response.data?.message || 'Please check your input and try again.';
+        } else if (error.response?.status === 503) {
+          // Service unavailable
+          errorMessage = 'Email service is temporarily unavailable. Please try again later or contact us directly.';
+        } else if (error.code === 'ECONNABORTED') {
+          // Request timeout
+          errorMessage = 'Request timed out. Please check your connection and try again.';
+        } else if (!error.response) {
+          // Network error
+          errorMessage = 'Network error. Please check your connection and try again.';
+        }
+        
         setErrors({
-          submit: error.response?.data?.message || 'Failed to send message. Please try again.'
+          submit: error.response?.data?.message || errorMessage
         });
       } finally {
         setIsSubmitting(false);

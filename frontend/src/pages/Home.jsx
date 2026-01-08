@@ -217,7 +217,7 @@ const Home = () => {
                 <span className="relative z-10">Explore Our Services</span>
               </Link>
               <a
-                href="https://wa.me/2349039223824"
+                href="https://wa.me/2349039223824?text=Hello%20SmartHub%20Studio%2C%20I%27d%20like%20to%20inquire%20about%20your%20services."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative overflow-hidden inline-block border-2 border-[#25D366] text-[#128C7E] bg-[white] hover:bg-[#25D366]/10 transition-all rounded-full px-8 py-3 font-bold text-lg md:text-xl flex items-center justify-center gap-2"
@@ -436,7 +436,7 @@ const Home = () => {
                 Start Your Project
               </Link>
               <a
-                href="https://wa.me/2349039223824"
+                href="https://wa.me/2349039223824?text=Hello%20SmartHub%20Studio%2C%20I%27d%20like%20to%20start%20a%20project%20with%20you."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative overflow-hidden inline-block bg-[#25D366] text-white hover:bg-[#128C7E] transition-all rounded-full px-10 py-4 font-bold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 hover:-translate-y-1"
