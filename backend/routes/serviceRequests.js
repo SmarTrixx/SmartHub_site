@@ -1,40 +1,11 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import nodemailer from 'nodemailer';
 import ServiceRequest from '../models/ServiceRequest.js';
 import upload, { fileToDataUrl } from '../middleware/upload.js';
 import { emailTemplates } from '../utils/emailTemplates.js';
+import { sendEmailAsync } from '../services/emailService.js';
 
 const router = express.Router();
-
-// Email transporter
-let transporter = null;
-const initializeTransporter = async () => {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
-        pass: process.env.GMAIL_PASSWORD || ''
-      },
-      pool: {
-        maxConnections: 5,
-        maxMessages: 100,
-        rateDelta: 4000,
-        rateLimit: 14
-      }
-    });
-    
-    transporter.verify((error) => {
-      if (!error) console.log('✅ Email service ready for service requests');
-    });
-  }
-  return transporter;
-};
-
-initializeTransporter();
 
 // Sanitize input
 const sanitizeInput = (str) => {
@@ -62,7 +33,10 @@ router.post('/',
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ 
+          success: false,
+          errors: errors.array() 
+        });
       }
 
       const {
@@ -78,7 +52,7 @@ router.post('/',
       // Handle file uploads - convert to base64
       const attachments = [];
       if (req.files && req.files.length > 0) {
-        req.files.forEach((file, idx) => {
+        req.files.forEach((file) => {
           const fileUrl = fileToDataUrl(file);
           attachments.push({
             fieldname: file.fieldname,
@@ -91,6 +65,7 @@ router.post('/',
         console.log(`✅ Attached ${attachments.length} files to service request`);
       }
 
+      // ALWAYS save request first - regardless of email
       const serviceRequest = new ServiceRequest({
         serviceType,
         clientName,
@@ -103,51 +78,75 @@ router.post('/',
         attachments,
         termsAccepted: termsAccepted === 'true' || termsAccepted === true,
         ipAddress: req.ip,
-        userAgent: req.get('user-agent')
+        userAgent: req.get('user-agent'),
+        emailSent: false // Track if confirmation email was sent
       });
 
       await serviceRequest.save();
-
-      // Generate reference ID (use first 8 chars of MongoDB ID)
       const referenceId = serviceRequest._id.toString().substring(0, 8).toUpperCase();
 
-      // Send confirmation email to client (non-blocking)
-      const mail = await initializeTransporter();
-      if (mail) {
-        const clientTemplate = emailTemplates.serviceRequestConfirmation(sanitizeInput(clientName), serviceType, referenceId);
-        mail.sendMail({
-          from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
-          to: clientEmail,
-          subject: clientTemplate.subject,
-          html: clientTemplate.html
-        }).catch(err => {
-          console.error('⚠️  Failed to send client confirmation:', err.message);
-        });
+      console.log(`📝 Service request saved: ${serviceType} from ${clientName} (ID: ${referenceId})`);
 
-        // Send admin notification
-        mail.sendMail({
-          from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
-          to: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com',
-          subject: `New Service Request #${referenceId} - ${serviceType}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px;">
-              <h2>New Service Request Submitted</h2>
-              <p><strong>Reference ID:</strong> ${referenceId}</p>
+      // Send emails asynchronously (non-blocking)
+      const clientTemplate = emailTemplates.serviceRequestConfirmation(
+        sanitizeInput(clientName), 
+        serviceType, 
+        referenceId
+      );
+
+      sendEmailAsync({
+        from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+        to: clientEmail,
+        subject: clientTemplate.subject,
+        html: clientTemplate.html,
+        replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
+      });
+
+      // Send admin notification
+      sendEmailAsync({
+        from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+        to: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com',
+        subject: `New Service Request #${referenceId} - ${serviceType}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #0057FF;">New Service Request Submitted</h2>
+            <div style="background: white; padding: 15px; border-left: 4px solid #0057FF; margin: 15px 0;">
+              <p><strong>Reference ID:</strong> <code>${referenceId}</code></p>
               <p><strong>Service Type:</strong> ${serviceType}</p>
               <p><strong>Client Name:</strong> ${sanitizeInput(clientName)}</p>
               <p><strong>Email:</strong> <a href="mailto:${clientEmail}">${clientEmail}</a></p>
               <p><strong>Phone:</strong> ${clientPhone || 'Not provided'}</p>
-              <hr>
-              <h3>Project Details:</h3>
-              <p>${sanitizeInput(projectDetails).replace(/\n/g, '<br>')}</p>
-              <p><a href="${process.env.FRONTEND_URL || 'https://smarthubz.vercel.app'}/admin/service-requests">View in Admin Panel</a></p>
             </div>
-          `,
-          replyTo: clientEmail
-        }).catch(err => {
-          console.error('⚠️  Failed to send admin notification:', err.message);
-        });
-      }
+            <h3>Project Details:</h3>
+            <p>${sanitizeInput(projectDetails).replace(/\n/g, '<br>')}</p>
+            <p style="margin-top: 20px;">
+              <a href="${process.env.FRONTEND_URL || 'https://smarthubz.vercel.app'}/admin/service-requests" style="background: #0057FF; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                View in Admin Panel
+              </a>
+            </p>
+          </div>
+        `,
+        replyTo: clientEmail
+      });
+
+      // Return success - emails sent async
+      res.status(201).json({
+        success: true,
+        message: 'Service request submitted successfully!',
+        requestId: serviceRequest._id,
+        referenceId: referenceId,
+        info: 'A confirmation email has been sent to your inbox.'
+      });
+
+    } catch (error) {
+      console.error('❌ Error creating service request:', error.message);
+      res.status(500).json({ 
+        success: false,
+        message: 'Error submitting service request. Please try again.'
+      });
+    }
+  }
+);
 
       console.log(`📝 Service request created: ${serviceType} from ${clientName} (ID: ${referenceId})`);
 
@@ -158,7 +157,10 @@ router.post('/',
       });
     } catch (error) {
       console.error('Error creating service request:', error);
-      res.status(500).json({ message: 'Error submitting service request', error: error.message });
+      res.status(500).json({ 
+        success: false,
+        message: 'Error submitting service request. Please try again.'
+      });
     }
   }
 );
@@ -167,16 +169,20 @@ router.post('/',
 router.get('/', async (req, res) => {
   try {
     const requests = await ServiceRequest.find()
-      .select('-attachments.dataUrl') // Exclude large base64 data in list
+      .select('-attachments.dataUrl')
       .sort({ createdAt: -1 });
     
     res.json({
+      success: true,
       total: requests.length,
       requests
     });
   } catch (error) {
     console.error('Error fetching service requests:', error);
-    res.status(500).json({ message: 'Error fetching requests' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching requests' 
+    });
   }
 });
 
@@ -185,12 +191,21 @@ router.get('/:requestId', async (req, res) => {
   try {
     const request = await ServiceRequest.findById(req.params.requestId);
     if (!request) {
-      return res.status(404).json({ message: 'Request not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Request not found' 
+      });
     }
-    res.json(request);
+    res.json({
+      success: true,
+      request
+    });
   } catch (error) {
     console.error('Error fetching service request:', error);
-    res.status(500).json({ message: 'Error fetching request' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching request' 
+    });
   }
 });
 
@@ -198,57 +213,70 @@ router.get('/:requestId', async (req, res) => {
 router.put('/:requestId/status', [
   body('status').isIn(['pending', 'reviewing', 'approved', 'in-progress', 'completed', 'rejected'])
     .withMessage('Invalid status'),
-  body('message').optional().trim()
+  body('adminMessage').optional().trim(),
+  body('internalNotes').optional().trim()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ 
+        success: false,
+        errors: errors.array() 
+      });
     }
 
-    const request = await ServiceRequest.findByIdAndUpdate(
-      req.params.requestId,
-      {
-        status: req.body.status,
-        statusUpdatedAt: new Date()
-      },
-      { new: true }
-    );
-
+    const request = await ServiceRequest.findById(req.params.requestId);
     if (!request) {
-      return res.status(404).json({ message: 'Request not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Request not found' 
+      });
     }
 
-    // Send status update email to client
-    const mail = await initializeTransporter();
-    if (mail) {
+    const previousStatus = request.status;
+    const newStatus = req.body.status;
+
+    // Update status only if changed
+    if (previousStatus !== newStatus) {
+      request.status = newStatus;
+      request.statusUpdatedAt = new Date();
+      await request.save();
+
+      // Send email async
       const referenceId = request._id.toString().substring(0, 8).toUpperCase();
       const statusTemplate = emailTemplates.serviceRequestStatusUpdate(
         request.clientName,
         referenceId,
-        req.body.status,
-        sanitizeInput(req.body.message || '')
+        newStatus,
+        req.body.adminMessage || ''
       );
-      
-      mail.sendMail({
+
+      sendEmailAsync({
         from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
         to: request.clientEmail,
         subject: statusTemplate.subject,
-        html: statusTemplate.html
-      }).catch(err => {
-        console.error('⚠️  Failed to send status update email:', err.message);
+        html: statusTemplate.html,
+        replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
       });
     }
 
-    console.log(`📧 Status update email sent to ${request.clientEmail} for request #${req.params.requestId}`);
+    // Save internal notes if provided
+    if (req.body.internalNotes) {
+      request.internalNotes = req.body.internalNotes;
+      await request.save();
+    }
 
     res.json({
+      success: true,
       message: 'Status updated successfully',
       request
     });
   } catch (error) {
     console.error('Error updating status:', error);
-    res.status(500).json({ message: 'Error updating status' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Error updating status' 
+    });
   }
 });
 

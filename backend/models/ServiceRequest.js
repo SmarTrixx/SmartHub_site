@@ -53,7 +53,15 @@ const serviceRequestSchema = new mongoose.Schema(
     },
     ipAddress: String,
     userAgent: String,
-    notes: {
+    internalNotes: {
+      type: String,
+      default: ''
+    },
+    emailSent: {
+      type: Boolean,
+      default: false
+    },
+    adminMessage: {
       type: String,
       default: ''
     }

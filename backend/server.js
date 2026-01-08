@@ -182,6 +182,7 @@ import profileRoutes from './routes/profile.js';
 import serviceRoutes from './routes/services.js';
 import contactRoutes from './routes/contact.js';
 import serviceRequestRoutes from './routes/serviceRequests.js';
+import { initializeEmailService } from './services/emailService.js';
 
 // Middleware to check MongoDB connection for API routes
 app.use('/api/', async (req, res, next) => {
@@ -253,6 +254,16 @@ app.use('/api/contact', contactRoutes);
 console.log('✓ /api/contact mounted');
 app.use('/api/service-requests', serviceRequestRoutes);
 console.log('✓ /api/service-requests mounted');
+
+// Initialize email service after all routes are mounted
+console.log('\n🚀 INITIALIZING SERVICES...');
+(async () => {
+  try {
+    await initializeEmailService();
+  } catch (error) {
+    console.error('⚠️  Email service initialization error (non-critical):', error.message);
+  }
+})();
 
 // Root endpoint
 app.get('/', (req, res) => {

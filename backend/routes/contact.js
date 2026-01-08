@@ -1,6 +1,6 @@
 import express from 'express';
-import nodemailer from 'nodemailer';
 import { body, validationResult } from 'express-validator';
+import { sendEmail, sendEmailAsync } from '../services/emailService.js';
 import { emailTemplates } from '../utils/emailTemplates.js';
 
 const router = express.Router();
@@ -9,55 +9,11 @@ const router = express.Router();
 router.get('/', (req, res) => {
   res.json({
     message: 'Contact API',
-    endpoints: [
-      'POST / - Submit contact form'
-    ]
+    endpoints: ['POST / - Submit contact form']
   });
 });
 
-// Email transporter with connection pooling
-let transporter = null;
-let transporterReady = false;
-
-const initializeTransporter = async () => {
-  if (!transporter) {
-    const gmailUser = process.env.GMAIL_USER || 'contact.smarthubz@gmail.com';
-    const gmailPass = process.env.GMAIL_PASSWORD || '';
-
-    transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // Use TLS
-      auth: {
-        user: gmailUser,
-        pass: gmailPass
-      },
-      pool: {
-        maxConnections: 5,
-        maxMessages: 100,
-        rateDelta: 4000,
-        rateLimit: 14
-      }
-    });
-
-    // Verify connection (non-blocking)
-    transporter.verify((error, success) => {
-      if (error) {
-        console.warn('⚠️  Email transporter verification failed:', error.message);
-        transporterReady = false;
-      } else {
-        console.log('✅ Email transporter ready');
-        transporterReady = true;
-      }
-    });
-  }
-  return transporter;
-};
-
-// Initialize on startup
-initializeTransporter();
-
-// Sanitize user input to prevent injection
+// Sanitize input to prevent XSS
 const sanitizeInput = (str) => {
   return str
     .replace(/&/g, '&amp;')
@@ -68,7 +24,7 @@ const sanitizeInput = (str) => {
     .trim();
 };
 
-// POST /api/contact - Send contact form email
+// POST /api/contact - Submit contact form
 router.post(
   '/',
   [
@@ -78,10 +34,10 @@ router.post(
   ],
   async (req, res) => {
     try {
-      // Check for validation errors
+      // Validate request body
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
           message: 'Validation error',
           errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
@@ -92,33 +48,22 @@ router.post(
       const sanitizedName = sanitizeInput(name);
       const sanitizedMessage = sanitizeInput(message);
 
-      // Get mail transporter
-      const mail = await initializeTransporter();
+      // Log contact submission
+      console.log(`📝 Contact submission: ${sanitizedName} (${email})`);
 
-      if (!mail) {
-        return res.status(503).json({
-          success: false,
-          message: 'Email service temporarily unavailable. Please try again later.'
-        });
-      }
-
-      // Get email templates
+      // Send user confirmation email (async, non-blocking)
       const userTemplate = emailTemplates.contactConfirmation(sanitizedName);
-      const adminTemplate = emailTemplates.contactAdminNotification(sanitizedName, email, sanitizedMessage);
-
-      // Send user confirmation email (non-blocking)
-      mail.sendMail({
+      sendEmailAsync({
         from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
         to: email,
         subject: userTemplate.subject,
-        html: userTemplate.html
-      }).catch(err => {
-        console.error('❌ Failed to send user confirmation email:', err.message);
-        // Don't fail the response - this is secondary
+        html: userTemplate.html,
+        replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
       });
 
-      // Send admin notification email
-      await mail.sendMail({
+      // Send admin notification email (async, non-blocking)
+      const adminTemplate = emailTemplates.contactAdminNotification(sanitizedName, email, sanitizedMessage);
+      sendEmailAsync({
         from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
         to: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com',
         subject: adminTemplate.subject,
@@ -126,39 +71,20 @@ router.post(
         replyTo: email
       });
 
+      // Return success immediately - emails are sent async
       res.status(200).json({
         success: true,
-        message: 'Message sent successfully! We will contact you shortly.',
-        info: 'A confirmation email has been sent to your inbox.'
+        message: 'Message submitted successfully',
+        info: 'We will contact you shortly. A confirmation email has been sent.'
       });
 
     } catch (error) {
-      console.error('❌ Error in contact form submission:', {
-        message: error.message,
-        code: error.code,
-        statusCode: error.responseCode
-      });
+      console.error('❌ CONTACT FORM ERROR:', error.message);
 
-      // Different error handling based on error type
-      if (error.code === 'EAUTH') {
-        return res.status(503).json({
-          success: false,
-          message: 'Email service authentication failed. Please try again later.'
-        });
-      }
-
-      if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-        return res.status(503).json({
-          success: false,
-          message: 'Email service connection failed. Please try again later.'
-        });
-      }
-
-      // Generic server error (production-safe)
-      res.status(500).json({
+      // Return 500 only for critical errors, not email failures
+      return res.status(500).json({
         success: false,
-        message: 'Failed to send message. Please try again later or contact us directly.',
-        ...(process.env.NODE_ENV === 'development' && { debug: error.message })
+        message: 'Failed to process your message. Please try again later.'
       });
     }
   }
