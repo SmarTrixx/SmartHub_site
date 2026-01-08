@@ -27,6 +27,7 @@ const Contact = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   // Fetch contact info from API
   useEffect(() => {
@@ -108,6 +109,7 @@ const Contact = () => {
 
         if (response.data.success) {
           setIsSuccess(true);
+          setEmailSent(response.data.emailSent === true);
           setFormData({ name: '', email: '', message: '' });
           // Hide success message after 7 seconds
           setTimeout(() => setIsSuccess(false), 7000);
@@ -190,8 +192,12 @@ const Contact = () => {
               >
                 <FiCheckCircle className="text-green-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium">Thank you for your message!</p>
-                  <p className="text-sm">We'll get back to you as soon as possible.</p>
+                  <p className="font-medium">Message received!</p>
+                  <p className="text-sm">
+                    {emailSent 
+                      ? "We've sent you a confirmation email. We'll get back to you as soon as possible."
+                      : "Your message was saved. Email confirmation may be delayed, but we've received it."}
+                  </p>
                 </div>
               </motion.div>
             )}

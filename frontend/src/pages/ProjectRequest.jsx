@@ -213,8 +213,15 @@ const ProjectRequest = () => {
       );
 
       console.log('✅ Service request submitted:', response.data);
+      
+      // Check if email was actually sent
+      const emailSent = response.data.emailSent === true;
+      const successMsg = emailSent 
+        ? 'Request submitted successfully! Confirmation email sent.' 
+        : 'Request submitted successfully. Email delivery may be delayed.';
+      
       setStep('success');
-      setMessage({ type: 'success', text: 'Request submitted successfully!' });
+      setMessage({ type: 'success', text: successMsg, emailSent });
     } catch (error) {
       console.error('Error:', error);
       setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to submit request' });
@@ -793,7 +800,10 @@ const ProjectRequest = () => {
                 Thank you for reaching out. We've received your {selectedService} request and will review it shortly.
               </p>
               <p className="text-gray-600 mb-8">
-                A confirmation email has been sent to <span className="font-semibold">{formData.clientEmail}</span>
+                {message.emailSent 
+                  ? (<><span className="font-semibold">{formData.clientEmail}</span> has received a confirmation email from us!</>)
+                  : (<>Please check <span className="font-semibold">{formData.clientEmail}</span> for a confirmation email (it may be delayed).</>)
+                }
               </p>
               <button
                 onClick={() => {

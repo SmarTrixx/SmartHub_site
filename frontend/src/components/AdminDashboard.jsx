@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiMenu, FiX, FiLogOut, FiHome, FiImage, FiUser, FiTool, FiMail } from 'react-icons/fi';
+import { FiMenu, FiX, FiLogOut, FiHome, FiImage, FiUser, FiTool, FiMail, FiGlobe, FiSettings } from 'react-icons/fi';
 import { authAPI } from '../services/api';
 import { sessionManager } from '../services/sessionManager';
 
@@ -57,7 +57,9 @@ const AdminDashboard = ({ children }) => {
     { icon: FiImage, label: 'Projects', path: '/admin/projects' },
     { icon: FiUser, label: 'Profile', path: '/admin/profile' },
     { icon: FiTool, label: 'Services', path: '/admin/services' },
-    { icon: FiMail, label: 'Service Requests', path: '/admin/service-requests' }
+    { icon: FiMail, label: 'Service Requests', path: '/admin/service-requests' },
+    { icon: FiGlobe, label: 'View Website', path: '/' },
+    { icon: FiSettings, label: 'Settings', path: '/admin/settings', disabled: true }
   ];
 
   return (
@@ -77,6 +79,18 @@ const AdminDashboard = ({ children }) => {
         <nav className="mt-8 space-y-2 px-4">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            if (item.disabled) {
+              return (
+                <div
+                  key={item.path}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 opacity-50 cursor-not-allowed"
+                  title="Coming soon"
+                >
+                  <Icon size={20} />
+                  <span>{item.label}</span>
+                </div>
+              );
+            }
             return (
               <a
                 key={item.path}
@@ -109,14 +123,33 @@ const AdminDashboard = ({ children }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Top Bar */}
-        <div className="bg-white shadow-sm p-4 flex items-center justify-between md:hidden">
-          <h1 className="text-lg font-bold text-[#22223B]">Admin Panel</h1>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
-          >
-            {sidebarOpen ? <FiX /> : <FiMenu />}
-          </button>
+        <div className="bg-white shadow-sm p-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 hover:bg-gray-100 rounded-lg md:hidden"
+            >
+              {sidebarOpen ? <FiX /> : <FiMenu />}
+            </button>
+            <h1 className="text-lg font-bold text-[#22223B] hidden md:block">Admin Panel</h1>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <a
+              href="/"
+              className="hidden md:flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-[#0057FF] transition-colors"
+            >
+              <FiGlobe size={18} />
+              View Website
+            </a>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-semibold"
+            >
+              <FiLogOut size={18} />
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Content Area */}

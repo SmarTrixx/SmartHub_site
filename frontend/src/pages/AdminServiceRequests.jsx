@@ -12,6 +12,7 @@ const AdminServiceRequests = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
+  const [statusMessages, setStatusMessages] = useState({});
 
   useEffect(() => {
     fetchRequests();
@@ -38,14 +39,22 @@ const AdminServiceRequests = () => {
   const updateRequestStatus = async (requestId, newStatus, statusMessage = '') => {
     try {
       const token = localStorage.getItem('adminToken');
+      const adminMessage = statusMessages[requestId] || '';
+      
       await axios.put(
         `${process.env.REACT_APP_API_URL}/service-requests/${requestId}/status`,
-        { status: newStatus, message: statusMessage },
+        { 
+          status: newStatus, 
+          message: statusMessage,
+          adminMessage: adminMessage
+        },
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      setMessage({ type: 'success', text: 'Status updated successfully. Email sent to client.' });
+      
+      setMessage({ type: 'success', text: `Status updated to ${newStatus}. Email sent to client.` });
+      setStatusMessages(prev => ({ ...prev, [requestId]: '' }));
       fetchRequests();
       setTimeout(() => setMessage(''), 4000);
     } catch (error) {
@@ -369,23 +378,53 @@ const AdminServiceRequests = () => {
                       </div>
                     )}
 
+                    {/* Internal Notes */}
+                    {request.internalNotes && (
+                      <div>
+                        <h4 className="font-bold text-[#22223B] mb-3">Internal Notes (Admin Only)</h4>
+                        <div className="bg-yellow-50 p-4 rounded border border-yellow-200 text-sm text-gray-700">
+                          {request.internalNotes}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Status Update */}
                     <div>
                       <h4 className="font-bold text-[#22223B] mb-3">Update Status</h4>
-                      <div className="flex gap-2 flex-wrap">
-                        {['pending', 'reviewing', 'approved', 'in-progress', 'completed', 'rejected'].map(status => (
-                          <button
-                            key={status}
-                            onClick={() => updateRequestStatus(request._id, status)}
-                            className={`px-4 py-2 rounded font-semibold transition-all ${
-                              request.status === status
-                                ? 'bg-[#0057FF] text-white'
-                                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                            }`}
-                          >
-                            {status}
-                          </button>
-                        ))}
+                      <div className="space-y-4">
+                        <div className="flex gap-2 flex-wrap">
+                          {['pending', 'reviewing', 'approved', 'in-progress', 'completed', 'rejected'].map(status => (
+                            <button
+                              key={status}
+                              onClick={() => updateRequestStatus(request._id, status)}
+                              className={`px-4 py-2 rounded font-semibold transition-all ${
+                                request.status === status
+                                  ? 'bg-[#0057FF] text-white'
+                                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                              }`}
+                            >
+                              {status}
+                            </button>
+                          ))}
+                        </div>
+                        
+                        {/* Admin Message for Status Update */}
+                        <div>
+                          <label className="block text-sm font-semibold text-[#22223B] mb-2">
+                            Custom Message (Optional - sent to client on status update)
+                          </label>
+                          <textarea
+                            value={statusMessages[request._id] || ''}
+                            onChange={(e) => setStatusMessages(prev => ({
+                              ...prev,
+                              [request._id]: e.target.value
+                            }))}
+                            placeholder="e.g., 'We're reviewing your request and will follow up in 2 days.' or 'We're at capacity. Please resubmit in 3 weeks.'"
+                            rows="3"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          />
+                          <p className="text-xs text-gray-600 mt-1">This message will be included in the status update email to the client.</p>
+                        </div>
                       </div>
                     </div>
 
