@@ -136,6 +136,9 @@ export const emailTemplates = {
       </div>
     `
   }),
+
+  // Service request status update
+  serviceRequestStatusUpdate: (name, referenceId, status, message) => {
     const statusColors = {
       'pending': '#FFA500',
       'reviewing': '#0057FF',
