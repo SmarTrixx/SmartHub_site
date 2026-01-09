@@ -23,7 +23,7 @@ const sendConfirmationEmails = async (serviceRequest, referenceId) => {
   const clientName = sanitizeInput(serviceRequest.clientName);
   const clientEmail = serviceRequest.clientEmail;
   const serviceType = serviceRequest.serviceType;
-  const adminEmail = process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com';
+  const adminEmail = process.env.ADMIN_EMAIL || 'smarthubzstudio@gmail.com';
 
   // Send client confirmation
   try {
@@ -64,7 +64,7 @@ const sendConfirmationEmails = async (serviceRequest, referenceId) => {
     );
 
     const result = await sendEmail({
-      from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+      from: process.env.GMAIL_USER_SECONDARY || 'smarthubzstudio@gmail.com',
       to: adminEmail,
       subject: adminTemplate.subject,
       html: adminTemplate.html,
@@ -283,11 +283,11 @@ router.put('/:requestId/status', [
           );
 
           const result = await sendEmail({
-            from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+            from: process.env.GMAIL_USER_SECONDARY || 'smarthubzstudio@gmail.com',
             to: request.clientEmail,
             subject: statusTemplate.subject,
             html: statusTemplate.html,
-            replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
+            replyTo: process.env.ADMIN_EMAIL || 'smarthubzstudio@gmail.com'
           });
 
           if (result.success) {
