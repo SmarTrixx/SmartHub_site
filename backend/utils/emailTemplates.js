@@ -179,10 +179,6 @@ export const emailTemplates = {
               <h4 style="margin-top: 0; color: #0057FF;">Additional Notes:</h4>
               <p style="margin: 0; color: #666; font-size: 14px;">${message}</p>
             </div>` : ''}
-            <p style="font-size: 16px; color: #666; line-height: 1.6;">
-             Next Steps: We’ll now finalize scope, timeline, and pricing before moving into execution. Once confirmed, a formal proposal and kickoff details will be shared. 
-             Please reply to this email or reach us via WhatsApp so we can proceed.
-            </p>
             <p style="font-size: 14px; color: #999; margin-top: 30px;">
               If you have any questions, please don't hesitate to contact us.
             </p>
