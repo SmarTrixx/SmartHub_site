@@ -188,15 +188,27 @@ const Contact = () => {
               <motion.div 
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 bg-green-50 text-green-700 rounded-[3rem] flex items-start"
+                className={`mb-6 p-4 rounded-[3rem] flex items-start ${
+                  emailSent 
+                    ? 'bg-green-50 text-green-700' 
+                    : 'bg-yellow-50 text-yellow-700'
+                }`}
               >
-                <FiCheckCircle className="text-green-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
+                {emailSent ? (
+                  <FiCheckCircle className="text-green-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <FiAlertCircle className="text-yellow-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
+                )}
                 <div>
-                  <p className="font-medium">Message received!</p>
+                  <p className="font-medium">
+                    {emailSent 
+                      ? "Message received!" 
+                      : "Message received with notification"}
+                  </p>
                   <p className="text-sm">
                     {emailSent 
                       ? "We've sent you a confirmation email. We'll get back to you as soon as possible."
-                      : "Your message was saved. Email confirmation may be delayed, but we've received it."}
+                      : "Your message has been saved. Confirmation emails could not be sent at this moment, but we've received it and will still get back to you shortly."}
                   </p>
                 </div>
               </motion.div>

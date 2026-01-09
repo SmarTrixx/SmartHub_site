@@ -190,6 +190,7 @@ import profileRoutes from './routes/profile.js';
 import serviceRoutes from './routes/services.js';
 import contactRoutes from './routes/contact.js';
 import serviceRequestRoutes from './routes/serviceRequests.js';
+import adminSettingsRoutes from './routes/adminSettings.js';
 import { initializeEmailService } from './services/emailService.js';
 
 // Middleware to check MongoDB connection for API routes
@@ -262,6 +263,8 @@ app.use('/api/contact', contactRoutes);
 console.log('✓ /api/contact mounted');
 app.use('/api/service-requests', serviceRequestRoutes);
 console.log('✓ /api/service-requests mounted');
+app.use('/api/admin/settings', adminSettingsRoutes);
+console.log('✓ /api/admin/settings mounted');
 
 // Initialize email service after all routes are mounted
 console.log('\n🚀 INITIALIZING SERVICES...');

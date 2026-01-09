@@ -1,8 +1,11 @@
 import nodemailer from 'nodemailer';
 
 let transporter = null;
+let transporterSecondary = null;
 let transporterReady = false;
+let transporterSecondaryReady = false;
 let transporterError = null;
+let transporterSecondaryError = null;
 
 /**
  * Initialize email transporter with proper configuration
@@ -12,6 +15,8 @@ export const initializeEmailService = async () => {
   try {
     const gmailUser = process.env.GMAIL_USER;
     const gmailPass = process.env.GMAIL_PASSWORD;
+    const gmailUserSecondary = process.env.GMAIL_USER_SECONDARY;
+    const gmailPassSecondary = process.env.GMAIL_PASSWORD_SECONDARY;
 
     if (!gmailUser || !gmailPass) {
       console.error('❌ EMAIL SERVICE: Missing GMAIL_USER or GMAIL_PASSWORD environment variables');
@@ -20,6 +25,7 @@ export const initializeEmailService = async () => {
       return null;
     }
 
+    // Initialize primary transporter
     transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
@@ -36,7 +42,28 @@ export const initializeEmailService = async () => {
       }
     });
 
-    // Verify connection at startup (blocking)
+    // Initialize secondary transporter if credentials provided
+    if (gmailUserSecondary && gmailPassSecondary) {
+      transporterSecondary = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: gmailUserSecondary,
+          pass: gmailPassSecondary
+        },
+        pool: {
+          maxConnections: 5,
+          maxMessages: 100,
+          rateDelta: 4000,
+          rateLimit: 14
+        }
+      });
+
+      console.log('✅ EMAIL SERVICE: Secondary transporter configured');
+    }
+
+    // Verify primary connection at startup (blocking)
     return new Promise((resolve) => {
       transporter.verify((error, success) => {
         if (error) {
@@ -50,6 +77,22 @@ export const initializeEmailService = async () => {
           console.log('✅ EMAIL SERVICE: SMTP connection verified and ready');
           transporterReady = true;
           transporterError = null;
+          
+          // Verify secondary if available
+          if (transporterSecondary) {
+            transporterSecondary.verify((secondaryError, secondarySuccess) => {
+              if (secondaryError) {
+                console.warn('⚠️  EMAIL SERVICE: Secondary transporter verification failed -', secondaryError.message);
+                transporterSecondaryReady = false;
+                transporterSecondaryError = secondaryError.message;
+              } else {
+                console.log('✅ EMAIL SERVICE: Secondary transporter verified and ready');
+                transporterSecondaryReady = true;
+                transporterSecondaryError = null;
+              }
+            });
+          }
+          
           resolve(true);
         }
       });
@@ -64,20 +107,23 @@ export const initializeEmailService = async () => {
 
 /**
  * Send email with automatic retry and fail-safe design
+ * Options: { mailOptions, emailType: 'primary|secondary', retries: 2 }
  * Returns { success: boolean, error?: string }
  */
-export const sendEmail = async (mailOptions, retries = 2) => {
+export const sendEmail = async (mailOptions, emailType = 'primary', retries = 2) => {
   try {
-    if (!transporter) {
-      console.warn('⚠️  EMAIL: Transporter not initialized');
+    const selectedTransporter = emailType === 'secondary' && transporterSecondary ? transporterSecondary : transporter;
+    
+    if (!selectedTransporter) {
+      console.warn(`⚠️  EMAIL: ${emailType} transporter not initialized`);
       return { success: false, error: 'Email service not initialized' };
     }
 
     // Attempt to send with retry logic
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ EMAIL SENT: ${mailOptions.subject} to ${mailOptions.to} (MessageID: ${info.messageId})`);
+        const info = await selectedTransporter.sendMail(mailOptions);
+        console.log(`✅ EMAIL SENT [${emailType}]: ${mailOptions.subject} to ${mailOptions.to} (MessageID: ${info.messageId})`);
         return { success: true };
       } catch (error) {
         console.warn(`⚠️  EMAIL FAILED (Attempt ${attempt}/${retries}): ${error.message}`);
@@ -102,14 +148,16 @@ export const sendEmail = async (mailOptions, retries = 2) => {
 /**
  * Send email without blocking - fire and forget with logging
  */
-export const sendEmailAsync = (mailOptions) => {
-  if (!transporter) {
-    console.warn('⚠️  EMAIL: Transporter not initialized, skipping async send');
+export const sendEmailAsync = (mailOptions, emailType = 'primary') => {
+  const selectedTransporter = emailType === 'secondary' && transporterSecondary ? transporterSecondary : transporter;
+  
+  if (!selectedTransporter) {
+    console.warn(`⚠️  EMAIL: ${emailType} transporter not initialized, skipping async send`);
     return;
   }
 
-  transporter.sendMail(mailOptions).catch(error => {
-    console.warn(`⚠️  ASYNC EMAIL FAILED: ${error.message} (to: ${mailOptions.to})`);
+  selectedTransporter.sendMail(mailOptions).catch(error => {
+    console.warn(`⚠️  ASYNC EMAIL FAILED [${emailType}]: ${error.message} (to: ${mailOptions.to})`);
   });
 };
 
@@ -118,9 +166,16 @@ export const sendEmailAsync = (mailOptions) => {
  */
 export const getEmailServiceStatus = () => {
   return {
-    ready: transporterReady,
-    error: transporterError,
-    configured: !!process.env.GMAIL_USER && !!process.env.GMAIL_PASSWORD
+    primary: {
+      ready: transporterReady,
+      error: transporterError,
+      configured: !!process.env.GMAIL_USER && !!process.env.GMAIL_PASSWORD
+    },
+    secondary: {
+      ready: transporterSecondaryReady,
+      error: transporterSecondaryError,
+      configured: !!process.env.GMAIL_USER_SECONDARY && !!process.env.GMAIL_PASSWORD_SECONDARY
+    }
   };
 };
 

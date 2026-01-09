@@ -14,6 +14,7 @@ import AdminProjects from '../pages/AdminProjects';
 import AdminProfile from '../pages/AdminProfile';
 import AdminServices from '../pages/AdminServices';
 import AdminServiceRequests from '../pages/AdminServiceRequests';
+import AdminSettings from '../pages/AdminSettings';
 
 const AppRoutes = () => (
   <Routes>
@@ -35,6 +36,7 @@ const AppRoutes = () => (
     <Route path="/admin/profile" element={<AdminProfile />} />
     <Route path="/admin/services" element={<AdminServices />} />
     <Route path="/admin/service-requests" element={<AdminServiceRequests />} />
+    <Route path="/admin/settings" element={<AdminSettings />} />
   </Routes>
 );
 

@@ -59,7 +59,7 @@ const AdminDashboard = ({ children }) => {
     { icon: FiTool, label: 'Services', path: '/admin/services' },
     { icon: FiMail, label: 'Service Requests', path: '/admin/service-requests', badge: true },
     { icon: FiGlobe, label: 'View Website', path: '/' },
-    { icon: FiSettings, label: 'Settings', path: '/admin/settings', disabled: true }
+    { icon: FiSettings, label: 'Settings', path: '/admin/settings' }
   ];
 
   return (

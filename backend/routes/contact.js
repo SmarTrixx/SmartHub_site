@@ -1,6 +1,6 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { sendEmail, sendEmailAsync } from '../services/emailService.js';
+import { sendEmail } from '../services/emailService.js';
 import { emailTemplates } from '../utils/emailTemplates.js';
 
 const router = express.Router();
@@ -51,31 +51,65 @@ router.post(
       // Log contact submission
       console.log(`📝 Contact submission: ${sanitizedName} (${email})`);
 
-      // Send user confirmation email (async, non-blocking)
-      const userTemplate = emailTemplates.contactConfirmation(sanitizedName);
-      sendEmailAsync({
-        from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
-        to: email,
-        subject: userTemplate.subject,
-        html: userTemplate.html,
-        replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
-      });
+      let emailSent = false;
+      let userEmailResult = null;
+      let adminEmailResult = null;
 
-      // Send admin notification email (async, non-blocking)
-      const adminTemplate = emailTemplates.contactAdminNotification(sanitizedName, email, sanitizedMessage);
-      sendEmailAsync({
-        from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
-        to: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com',
-        subject: adminTemplate.subject,
-        html: adminTemplate.html,
-        replyTo: email
-      });
+      // Send user confirmation email (blocking - wait for result)
+      try {
+        const userTemplate = emailTemplates.contactConfirmation(sanitizedName);
+        userEmailResult = await sendEmail({
+          from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+          to: email,
+          subject: userTemplate.subject,
+          html: userTemplate.html,
+          replyTo: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com'
+        });
 
-      // Return success immediately - emails are sent async
+        console.log(`📧 User confirmation email: ${userEmailResult.success ? '✅ Sent' : '❌ Failed'}`);
+      } catch (error) {
+        console.error(`❌ User confirmation email error: ${error.message}`);
+        userEmailResult = { success: false, error: error.message };
+      }
+
+      // Send admin notification email (blocking - wait for result)
+      try {
+        const adminTemplate = emailTemplates.contactAdminNotification(sanitizedName, email, sanitizedMessage);
+        adminEmailResult = await sendEmail({
+          from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+          to: process.env.ADMIN_EMAIL || 'contact.smarthubz@gmail.com',
+          subject: adminTemplate.subject,
+          html: adminTemplate.html,
+          replyTo: email
+        });
+
+        console.log(`📧 Admin notification email: ${adminEmailResult.success ? '✅ Sent' : '❌ Failed'}`);
+      } catch (error) {
+        console.error(`❌ Admin notification email error: ${error.message}`);
+        adminEmailResult = { success: false, error: error.message };
+      }
+
+      // Consider it a success if at least one email was sent (user confirmation is priority)
+      emailSent = userEmailResult?.success === true || adminEmailResult?.success === true;
+
+      // Log the email result
+      const emailStatus = {
+        userConfirmation: userEmailResult?.success ? 'sent' : 'failed',
+        adminNotification: adminEmailResult?.success ? 'sent' : 'failed',
+        overallStatus: emailSent ? 'success' : 'failed'
+      };
+
+      console.log(`✅ CONTACT FORM: ${sanitizedName} - Email status:`, emailStatus);
+
+      // Return success response with actual email status
       res.status(200).json({
         success: true,
         message: 'Message submitted successfully',
-        info: 'We will contact you shortly. A confirmation email has been sent.'
+        emailSent: emailSent,
+        info: emailSent 
+          ? 'We will contact you shortly. A confirmation email has been sent.'
+          : 'Your message has been received. However, confirmation emails could not be sent at this moment. We will still get back to you shortly.',
+        emailStatus: emailStatus
       });
 
     } catch (error) {
@@ -84,7 +118,8 @@ router.post(
       // Return 500 only for critical errors, not email failures
       return res.status(500).json({
         success: false,
-        message: 'Failed to process your message. Please try again later.'
+        message: 'Failed to process your message. Please try again later.',
+        emailSent: false
       });
     }
   }
