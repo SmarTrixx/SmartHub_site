@@ -34,7 +34,7 @@ const sendConfirmationEmails = async (serviceRequest, referenceId) => {
     );
 
     const result = await sendEmail({
-      from: process.env.GMAIL_USER || 'contact.smarthubz@gmail.com',
+      from: process.env.GMAIL_USER_SECONDARY || 'smarthubzstudio@gmail.com',
       to: clientEmail,
       subject: clientTemplate.subject,
       html: clientTemplate.html,
