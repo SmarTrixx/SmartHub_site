@@ -1,6 +1,6 @@
 import express from 'express';
 import { getEmailServiceStatus } from '../services/emailService.js';
-import { authenticateAdmin } from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -8,7 +8,7 @@ const router = express.Router();
  * GET /api/admin/settings - Get admin settings (email config, etc.)
  * Requires admin authentication
  */
-router.get('/', authenticateAdmin, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const emailStatus = getEmailServiceStatus();
 
@@ -52,7 +52,7 @@ router.get('/', authenticateAdmin, async (req, res) => {
  * GET /api/admin/settings/email-status - Get detailed email configuration status
  * Requires admin authentication
  */
-router.get('/email-status', authenticateAdmin, async (req, res) => {
+router.get('/email-status', auth, async (req, res) => {
   try {
     const emailStatus = getEmailServiceStatus();
 
