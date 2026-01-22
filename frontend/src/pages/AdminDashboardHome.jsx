@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiImage, FiTool, FiUser, FiArrowRight, FiMail } from 'react-icons/fi';
 import axios from 'axios';
-import api, { projectsAPI, servicesAPI, profileAPI } from '../services/api';
+import { projectsAPI, servicesAPI, profileAPI } from '../services/api';
 import AdminDashboard from '../components/AdminDashboard';
 
 const AdminDashboardHome = () => {

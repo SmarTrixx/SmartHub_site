@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX } from "react-icons/fi";
 import portfolioItems from "../data/portfolio";
@@ -48,7 +48,6 @@ const Home = () => {
   const [stats, setStats] = useState(defaultStats);
   const [, setLoading] = useState(true);
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     let i = 0;

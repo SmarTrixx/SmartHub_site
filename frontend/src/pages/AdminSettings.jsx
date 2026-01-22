@@ -13,6 +13,7 @@ const AdminSettings = () => {
 
   useEffect(() => {
     fetchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiUrl]);
 
   const fetchSettings = async () => {
