@@ -69,6 +69,9 @@ const ProjectRequest = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState([]);
+  const [showDesignGuide, setShowDesignGuide] = useState(false);
+  const [graphicsFormStep, setGraphicsFormStep] = useState('contact'); // contact, project-type, details, review
+  const [focusAreas, setFocusAreas] = useState('');
   
   const [formData, setFormData] = useState({
     clientName: '',
@@ -77,6 +80,12 @@ const ProjectRequest = () => {
     termsAccepted: false,
     // Graphics Design specific
     projectType: '',
+    logoNewOrExisting: '', // Logo specific
+    logoUsage: '', // Logo specific
+    flyerPrintOrDigital: '', // Flyer specific
+    flyerSize: '', // Flyer specific
+    socialMediaPlatforms: '', // Social Media specific
+    socialMediaCount: '', // Social Media specific
     brandDescription: '',
     targetAudience: '',
     preferredStyles: '',
@@ -259,6 +268,20 @@ const ProjectRequest = () => {
         data.dimensions = formData.dimensions;
         data.deadline = formData.deadline;
         data.budget = formData.budget;
+        // Add adaptive fields
+        data.focusAreas = focusAreas;
+        if (formData.projectType === 'Logo Design') {
+          data.logoNewOrExisting = formData.logoNewOrExisting;
+          data.logoUsage = formData.logoUsage;
+        }
+        if (formData.projectType === 'Flyer') {
+          data.flyerPrintOrDigital = formData.flyerPrintOrDigital;
+          data.flyerSize = formData.flyerSize;
+        }
+        if (formData.projectType === 'Social Media') {
+          data.socialMediaPlatforms = formData.socialMediaPlatforms;
+          data.socialMediaCount = formData.socialMediaCount;
+        }
         break;
       case 'Software Development':
         data.projectScope = formData.projectScope;
@@ -292,174 +315,533 @@ const ProjectRequest = () => {
   const renderForm = () => {
     switch (selectedService) {
       case 'Graphics Design':
+        // Adaptive form with progressive disclosure
         return (
           <div className="space-y-8">
-            {/* What do you need? */}
-            <div>
-              <div className="mb-4">
-                <label className="block text-sm font-semibold text-[#22223B] mb-3">What do you need designed? *</label>
-                <p className="text-sm text-gray-600 mb-3">It's okay if you're not sure about the details — we'll guide you.</p>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {[
-                  { value: 'Logo Design', label: '🎯 Logo' },
-                  { value: 'Flyer', label: '📄 Flyer' },
-                  { value: 'Business Cards', label: '💳 Business Cards' },
-                  { value: 'Social Media', label: '📱 Social Media' },
-                  { value: 'Poster', label: '📌 Poster' },
-                  { value: 'Other', label: '✨ Other' }
-                ].map(option => (
-                  <label key={option.value} className="relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all" style={{
-                    borderColor: formData.projectType === option.value ? '#0057FF' : '#e5e7eb',
-                    backgroundColor: formData.projectType === option.value ? '#0057FF15' : 'white'
-                  }}>
+            {/* Step 1: Contact Info (if on graphics form step) */}
+            {graphicsFormStep === 'contact' && (
+              <>
+                <div className="text-sm text-gray-600 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <strong>Step 1 of 4:</strong> Let's start with your contact information
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#22223B] mb-2">Your Name *</label>
                     <input
-                      type="radio"
-                      name="projectType"
-                      value={option.value}
-                      checked={formData.projectType === option.value}
+                      type="text"
+                      name="clientName"
+                      value={formData.clientName}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                      required
+                      className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#22223B] mb-2">Email *</label>
+                    <input
+                      type="email"
+                      name="clientEmail"
+                      value={formData.clientEmail}
+                      onChange={handleChange}
+                      placeholder="you@example.com"
+                      required
+                      className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#22223B] mb-2">Phone (Optional)</label>
+                  <input
+                    type="tel"
+                    name="clientPhone"
+                    value={formData.clientPhone}
+                    onChange={handleChange}
+                    placeholder="+234 (0)123 456 789"
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    if (formData.clientName && formData.clientEmail) {
+                      setGraphicsFormStep('project-type');
+                    } else {
+                      setMessage({ type: 'error', text: 'Please fill in your name and email' });
+                    }
+                  }}
+                  className="w-full bg-[#0057FF] text-white py-3 rounded-lg font-semibold hover:bg-[#0047D4] transition-colors"
+                >
+                  Continue
+                </button>
+              </>
+            )}
+
+            {/* Step 2: Project Type Selection */}
+            {graphicsFormStep === 'project-type' && (
+              <>
+                <div className="text-sm text-gray-600 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <strong>Step 2 of 4:</strong> What do you need designed?
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-4">It's okay if you're not sure about the details — we'll guide you.</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {[
+                      { value: 'Logo Design', label: '🎯 Logo' },
+                      { value: 'Flyer', label: '📄 Flyer' },
+                      { value: 'Business Cards', label: '💳 Business Cards' },
+                      { value: 'Social Media', label: '📱 Social Media' },
+                      { value: 'Poster', label: '📌 Poster' },
+                      { value: 'Other', label: '✨ Other' }
+                    ].map(option => (
+                      <label key={option.value} className="relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all" style={{
+                        borderColor: formData.projectType === option.value ? '#0057FF' : '#e5e7eb',
+                        backgroundColor: formData.projectType === option.value ? '#0057FF15' : 'white'
+                      }}>
+                        <input
+                          type="radio"
+                          name="projectType"
+                          value={option.value}
+                          checked={formData.projectType === option.value}
+                          onChange={handleChange}
+                          required
+                          className="sr-only"
+                        />
+                        <span className="text-center flex-1 font-medium text-[#22223B]">{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-8">
+                  <button
+                    onClick={() => setGraphicsFormStep('contact')}
+                    className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (formData.projectType) {
+                        setGraphicsFormStep('details');
+                      } else {
+                        setMessage({ type: 'error', text: 'Please select a project type' });
+                      }
+                    }}
+                    className="flex-1 bg-[#0057FF] text-white py-3 rounded-lg font-semibold hover:bg-[#0047D4] transition-colors"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step 3: Project Details with Adaptive Questions */}
+            {graphicsFormStep === 'details' && (
+              <>
+                <div className="text-sm text-gray-600 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <strong>Step 3 of 4:</strong> Tell us about your {formData.projectType.toLowerCase()}
+                </div>
+
+                {/* Base fields always shown */}
+                <div>
+                  <label className="block text-sm font-semibold text-[#22223B] mb-2">Tell us about your project *</label>
+                  <p className="text-sm text-gray-600 mb-3">Who are you? What's your business about? What's the main message?</p>
+                  <textarea
+                    name="brandDescription"
+                    value={formData.brandDescription}
+                    onChange={handleChange}
+                    placeholder="E.g., I'm a fitness coach helping busy professionals get fit. I want a logo that says 'strong and approachable'."
+                    required
+                    rows="4"
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  />
+                </div>
+
+                {/* Adaptive questions based on project type */}
+                {formData.projectType === 'Logo Design' && (
+                  <>
+                    <div className="border-t pt-6">
+                      <h3 className="font-semibold text-[#22223B] mb-4">Let's customize this for your logo</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-[#22223B] mb-2">Is this a new logo or updating an existing one? (Optional)</label>
+                          <select
+                            name="logoNewOrExisting"
+                            value={formData.logoNewOrExisting}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          >
+                            <option value="">Choose an option...</option>
+                            <option value="New logo">New logo for our brand</option>
+                            <option value="Updating existing">Updating our existing logo</option>
+                            <option value="Not sure">Not sure yet</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-[#22223B] mb-2">Where will the logo be used? (Optional)</label>
+                          <p className="text-sm text-gray-600 mb-3">E.g., on your website, business cards, social media, signs</p>
+                          <input
+                            type="text"
+                            name="logoUsage"
+                            value={formData.logoUsage}
+                            onChange={(e) => setFormData(prev => ({ ...prev, logoUsage: e.target.value }))}
+                            placeholder="Not sure? We'll design it for everywhere"
+                            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {formData.projectType === 'Flyer' && (
+                  <>
+                    <div className="border-t pt-6">
+                      <h3 className="font-semibold text-[#22223B] mb-4">Let's customize this for your flyer</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-[#22223B] mb-2">Will this be printed or digital? (Optional)</label>
+                          <div className="flex gap-3">
+                            {['Printed', 'Digital', 'Both', 'Not sure'].map(option => (
+                              <label key={option} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="flyerPrintOrDigital"
+                                  value={option}
+                                  checked={formData.flyerPrintOrDigital === option}
+                                  onChange={handleChange}
+                                  className="w-4 h-4"
+                                />
+                                <span className="text-sm text-gray-700">{option}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-[#22223B] mb-2">What size do you prefer? (Optional)</label>
+                          <select
+                            name="flyerSize"
+                            value={formData.flyerSize}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          >
+                            <option value="">Choose a size...</option>
+                            <option value="A4">A4 (standard letter size)</option>
+                            <option value="A5">A5 (half page)</option>
+                            <option value="Half letter">Half letter (5.5 x 8.5 inches)</option>
+                            <option value="Any size">Any size works</option>
+                            <option value="Not sure">Not sure</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {formData.projectType === 'Social Media' && (
+                  <>
+                    <div className="border-t pt-6">
+                      <h3 className="font-semibold text-[#22223B] mb-4">Let's customize this for social media</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-[#22223B] mb-2">Which platform? (Optional)</label>
+                          <input
+                            type="text"
+                            name="socialMediaPlatforms"
+                            value={formData.socialMediaPlatforms}
+                            onChange={(e) => setFormData(prev => ({ ...prev, socialMediaPlatforms: e.target.value }))}
+                            placeholder="E.g., Instagram, Facebook, TikTok, all of them, not sure"
+                            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-[#22223B] mb-2">How many designs? (Optional)</label>
+                          <select
+                            name="socialMediaCount"
+                            value={formData.socialMediaCount}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                          >
+                            <option value="">Choose quantity...</option>
+                            <option value="1-3">1-3 posts</option>
+                            <option value="4-8">4-8 posts</option>
+                            <option value="Monthly pack">Monthly pack (ongoing)</option>
+                            <option value="Not sure">Not sure</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Visual Guide Section - Collapsible */}
+                <div className="border-t pt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowDesignGuide(!showDesignGuide)}
+                    className="flex items-center gap-2 text-[#0057FF] font-semibold hover:underline"
+                  >
+                    {showDesignGuide ? '▼' : '▶'} View example design breakdown
+                  </button>
+
+                  {showDesignGuide && (
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className="text-sm text-gray-600 mb-4">
+                        This is just a visual guide to help you — you don't need to know the terms.
+                      </p>
+                      
+                      {/* Sample images based on project type */}
+                      <div className="bg-white p-4 rounded border border-gray-300">
+                        {formData.projectType === 'Logo Design' && (
+                          <div className="space-y-3 text-center">
+                            <img src="/images/sample-logo-breakdown.svg" alt="Logo design example" className="w-full h-auto max-w-xs mx-auto" onError={(e) => {
+                              e.target.style.display = 'none';
+                            }} />
+                            <div className="text-xs text-gray-600">
+                              <p>← Brand name, Main symbol, Hidden message →</p>
+                            </div>
+                          </div>
+                        )}
+                        {formData.projectType === 'Flyer' && (
+                          <div className="space-y-3 text-center">
+                            <img src="/images/sample-flyer-breakdown.svg" alt="Flyer design example" className="w-full h-auto max-w-xs mx-auto" onError={(e) => {
+                              e.target.style.display = 'none';
+                            }} />
+                            <div className="text-xs text-gray-600">
+                              <p>← Headline, Main image, Details, Call to action →</p>
+                            </div>
+                          </div>
+                        )}
+                        {formData.projectType === 'Social Media' && (
+                          <div className="space-y-3 text-center">
+                            <img src="/images/sample-social-breakdown.svg" alt="Social media design example" className="w-full h-auto max-w-xs mx-auto" onError={(e) => {
+                              e.target.style.display = 'none';
+                            }} />
+                            <div className="text-xs text-gray-600">
+                              <p>← Main message, Eye-catching image, Your contact →</p>
+                            </div>
+                          </div>
+                        )}
+                        {formData.projectType === 'Business Cards' && (
+                          <div className="space-y-3 text-center">
+                            <img src="/images/sample-card-breakdown.svg" alt="Business card design example" className="w-full h-auto max-w-xs mx-auto" onError={(e) => {
+                              e.target.style.display = 'none';
+                            }} />
+                            <div className="text-xs text-gray-600">
+                              <p>← Logo, Name, Title, Contact details →</p>
+                            </div>
+                          </div>
+                        )}
+                        {formData.projectType === 'Poster' && (
+                          <div className="space-y-3 text-center">
+                            <img src="/images/sample-poster-breakdown.svg" alt="Poster design example" className="w-full h-auto max-w-xs mx-auto" onError={(e) => {
+                              e.target.style.display = 'none';
+                            }} />
+                            <div className="text-xs text-gray-600">
+                              <p>← Main headline, Image/graphics, Details, Event info →</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Helper question after image */}
+                      <div className="mt-4 pt-4 border-t">
+                        <label className="block text-sm font-semibold text-[#22223B] mb-3">After seeing the example, what should we focus on? (Optional)</label>
+                        <div className="space-y-2">
+                          {['Text clarity', 'Colors', 'Logo placement', 'Overall look', 'Not sure'].map(option => (
+                            <label key={option} className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="focusAreas"
+                                value={option}
+                                checked={focusAreas === option}
+                                onChange={(e) => setFocusAreas(e.target.value)}
+                                className="w-4 h-4"
+                              />
+                              <span className="text-sm text-gray-700">{option}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Continue to style preferences */}
+                <div className="flex gap-3 mt-8">
+                  <button
+                    onClick={() => setGraphicsFormStep('project-type')}
+                    className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (formData.brandDescription && formData.deadline) {
+                        setGraphicsFormStep('review');
+                      } else {
+                        setMessage({ type: 'error', text: 'Please fill in the project description' });
+                      }
+                    }}
+                    className="flex-1 bg-[#0057FF] text-white py-3 rounded-lg font-semibold hover:bg-[#0047D4] transition-colors"
+                  >
+                    Review & Submit
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step 4: Review and Style Preferences */}
+            {graphicsFormStep === 'review' && (
+              <>
+                <div className="text-sm text-gray-600 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <strong>Step 4 of 4:</strong> Final touches
+                </div>
+
+                {/* Style preferences */}
+                <div>
+                  <label className="block text-sm font-semibold text-[#22223B] mb-3">What's the overall feel? (Optional)</label>
+                  <p className="text-sm text-gray-600 mb-3">Choose what resonates with you, or we can decide together.</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {[
+                      { value: 'Clean & Simple', emoji: '✨' },
+                      { value: 'Bold & Eye-catching', emoji: '⚡' },
+                      { value: 'Elegant & Professional', emoji: '🎩' },
+                      { value: 'Playful & Fun', emoji: '🎨' },
+                      { value: 'Minimal & Modern', emoji: '◻️' },
+                      { value: 'Classic & Timeless', emoji: '📚' },
+                      { value: 'Not sure yet', emoji: '🤔' }
+                    ].map(option => (
+                      <label key={option.value} className="relative flex flex-col items-center p-3 border rounded-lg cursor-pointer transition-all" style={{
+                        borderColor: formData.preferredStyles === option.value ? '#0057FF' : '#e5e7eb',
+                        backgroundColor: formData.preferredStyles === option.value ? '#0057FF15' : 'white'
+                      }}>
+                        <input
+                          type="radio"
+                          name="preferredStyles"
+                          value={option.value}
+                          checked={formData.preferredStyles === option.value}
+                          onChange={handleChange}
+                          className="sr-only"
+                        />
+                        <span className="text-2xl mb-1">{option.emoji}</span>
+                        <span className="text-xs text-center font-medium text-[#22223B]">{option.value}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Colors and fonts */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#22223B] mb-2">Color preference? (Optional)</label>
+                    <p className="text-sm text-gray-600 mb-3">Pick your favorite color, or we'll choose for you.</p>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        name="colorPreference"
+                        value={formData.colorPreference}
+                        onChange={handleColorChange}
+                        className="w-16 h-16 rounded cursor-pointer border-2 border-gray-300"
+                      />
+                      <span className="text-sm text-gray-600">{formData.colorPreference}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#22223B] mb-2">Font style? (Optional)</label>
+                    <p className="text-sm text-gray-600 mb-3">Easy to read? Bold? Elegant?</p>
+                    <input
+                      type="text"
+                      name="typographyPrefs"
+                      value={formData.typographyPrefs}
+                      onChange={handleChange}
+                      placeholder="E.g., Easy to read, Bold & strong"
+                      className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                    />
+                  </div>
+                </div>
+
+                {/* Size and timeline */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#22223B] mb-2">What size? (Optional)</label>
+                    <p className="text-sm text-gray-600 mb-3">E.g., A4 page, square for social media, any size</p>
+                    <input
+                      type="text"
+                      name="dimensions"
+                      value={formData.dimensions}
+                      onChange={handleChange}
+                      placeholder="Not sure? We'll figure it out."
+                      className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#22223B] mb-2">When do you need it? *</label>
+                    <input
+                      type="date"
+                      name="deadline"
+                      value={formData.deadline}
                       onChange={handleChange}
                       required
-                      className="sr-only"
+                      className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                     />
-                    <span className="text-center flex-1 font-medium text-[#22223B]">{option.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* About your project */}
-            <div>
-              <label className="block text-sm font-semibold text-[#22223B] mb-2">Tell us about your project *</label>
-              <p className="text-sm text-gray-600 mb-3">Who are you? What's your business about? What's the main message?</p>
-              <textarea
-                name="brandDescription"
-                value={formData.brandDescription}
-                onChange={handleChange}
-                placeholder="E.g., I'm a fitness coach helping busy professionals get fit. I want a logo that says 'strong and approachable'."
-                required
-                rows="4"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-              />
-            </div>
-
-            {/* Who will see this? */}
-            <div>
-              <label className="block text-sm font-semibold text-[#22223B] mb-2">Who will see this? (Optional)</label>
-              <p className="text-sm text-gray-600 mb-3">E.g., young professionals, parents, students</p>
-              <input
-                type="text"
-                name="targetAudience"
-                value={formData.targetAudience}
-                onChange={handleChange}
-                placeholder="Not sure? We can help figure this out."
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-              />
-            </div>
-
-            {/* What's the vibe? */}
-            <div>
-              <label className="block text-sm font-semibold text-[#22223B] mb-3">What's the overall feel? (Optional)</label>
-              <p className="text-sm text-gray-600 mb-3">Choose what resonates with you, or we can decide together.</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {[
-                  { value: 'Clean & Simple', emoji: '✨' },
-                  { value: 'Bold & Eye-catching', emoji: '⚡' },
-                  { value: 'Elegant & Professional', emoji: '🎩' },
-                  { value: 'Playful & Fun', emoji: '🎨' },
-                  { value: 'Minimal & Modern', emoji: '◻️' },
-                  { value: 'Classic & Timeless', emoji: '📚' },
-                  { value: 'Not sure yet', emoji: '🤔' }
-                ].map(option => (
-                  <label key={option.value} className="relative flex flex-col items-center p-3 border rounded-lg cursor-pointer transition-all" style={{
-                    borderColor: formData.preferredStyles === option.value ? '#0057FF' : '#e5e7eb',
-                    backgroundColor: formData.preferredStyles === option.value ? '#0057FF15' : 'white'
-                  }}>
-                    <input
-                      type="radio"
-                      name="preferredStyles"
-                      value={option.value}
-                      checked={formData.preferredStyles === option.value}
-                      onChange={handleChange}
-                      className="sr-only"
-                    />
-                    <span className="text-2xl mb-1">{option.emoji}</span>
-                    <span className="text-xs text-center font-medium text-[#22223B]">{option.value}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Colors and fonts - simplified */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Color preference? (Optional)</label>
-                <p className="text-sm text-gray-600 mb-3">Pick your favorite color, or we'll choose for you.</p>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    name="colorPreference"
-                    value={formData.colorPreference}
-                    onChange={handleColorChange}
-                    className="w-16 h-16 rounded cursor-pointer border-2 border-gray-300"
-                  />
-                  <span className="text-sm text-gray-600">{formData.colorPreference}</span>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Font style? (Optional)</label>
-                <p className="text-sm text-gray-600 mb-3">Easy to read? Bold? Elegant?</p>
-                <input
-                  type="text"
-                  name="typographyPrefs"
-                  value={formData.typographyPrefs}
-                  onChange={handleChange}
-                  placeholder="E.g., Easy to read, Bold & strong"
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                />
-              </div>
-            </div>
 
-            {/* Size and timeline */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">What size? (Optional)</label>
-                <p className="text-sm text-gray-600 mb-3">E.g., A4 page, square for social media, any size</p>
-                <input
-                  type="text"
-                  name="dimensions"
-                  value={formData.dimensions}
-                  onChange={handleChange}
-                  placeholder="Not sure? We'll figure it out."
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">When do you need it? *</label>
-                <input
-                  type="date"
-                  name="deadline"
-                  value={formData.deadline}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                />
-              </div>
-            </div>
+                {/* Budget */}
+                <div>
+                  <label className="block text-sm font-semibold text-[#22223B] mb-2">Budget? (Optional)</label>
+                  <p className="text-sm text-gray-600 mb-3">Helps us understand your expectations. Leave blank if you'd like us to suggest.</p>
+                  <input
+                    type="text"
+                    name="budget"
+                    value={formData.budget}
+                    onChange={handleChange}
+                    placeholder="E.g., ₦5,000 - ₦15,000"
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  />
+                </div>
 
-            {/* Budget */}
-            <div>
-              <label className="block text-sm font-semibold text-[#22223B] mb-2">Budget? (Optional)</label>
-              <p className="text-sm text-gray-600 mb-3">Helps us understand your expectations. Leave blank if you'd like us to suggest.</p>
-              <input
-                type="text"
-                name="budget"
-                value={formData.budget}
-                onChange={handleChange}
-                placeholder="E.g., ₦5,000 - ₦15,000"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-              />
-            </div>
+                {/* Business owner safeguard notice */}
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+                  <p>
+                    <strong>Please note:</strong> Submitting this form does not guarantee immediate project acceptance. 
+                    Your request will be reviewed within 24–48 hours.
+                  </p>
+                </div>
+
+                {/* Terms */}
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    name="termsAccepted"
+                    checked={formData.termsAccepted}
+                    onChange={handleChange}
+                    required
+                    className="w-4 h-4 mt-1 rounded cursor-pointer"
+                  />
+                  <label className="text-sm text-gray-700">
+                    I agree to the terms and conditions and understand that revisions are included in the project scope.
+                  </label>
+                </div>
+
+                {/* Navigation */}
+                <div className="flex gap-3 mt-8">
+                  <button
+                    onClick={() => setGraphicsFormStep('details')}
+                    className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? 'Submitting...' : 'Submit Request'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         );
       
