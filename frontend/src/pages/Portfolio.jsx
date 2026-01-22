@@ -360,7 +360,10 @@ const Portfolio = () => {
 
               <div className="p-8">
                 <div className="grid md:grid-cols-2 gap-8 mb-8">
-                  <div className="rounded-xl overflow-hidden relative group">
+                  <div className="rounded-xl overflow-hidden relative group cursor-pointer" onClick={() => {
+                    navigate(selectedItem.link || `/portfolio/${selectedItem.id}`);
+                    closeModal();
+                  }}>
                     <img
                       src={(() => {
                         let imageUrl = selectedItem.image || '/android-chrome-512x512.png';
@@ -371,15 +374,7 @@ const Portfolio = () => {
                         return imageUrl;
                       })()}
                       alt={selectedItem.title}
-                      className="w-full h-auto object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                      onClick={() => setFullscreenImage((() => {
-                        let imageUrl = selectedItem.image || '/android-chrome-512x512.png';
-                        if (imageUrl.startsWith('/uploads/')) {
-                          const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
-                          imageUrl = `${baseUrl}${imageUrl}`;
-                        }
-                        return imageUrl;
-                      })())}
+                      className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.target.src = '/android-chrome-512x512.png';
                       }}

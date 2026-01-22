@@ -262,6 +262,7 @@ const ProjectRequest = () => {
         break;
       case 'Software Development':
         data.projectScope = formData.projectScope;
+        data.targetAudience = formData.targetAudience;
         data.techStack = formData.techStack;
         data.timeline = formData.timeline;
         data.budget = formData.budget;
@@ -292,182 +293,254 @@ const ProjectRequest = () => {
     switch (selectedService) {
       case 'Graphics Design':
         return (
-          <div className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Project Type *</label>
-                <select
-                  name="projectType"
-                  value={formData.projectType}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                >
-                  <option value="">Select project type</option>
-                  <option value="Logo Design">Logo Design</option>
-                  <option value="Flyer">Flyer</option>
-                  <option value="Brand Kit">Brand Kit</option>
-                  <option value="Business Cards">Business Cards</option>
-                  <option value="Poster">Poster</option>
-                  <option value="Other">Other</option>
-                </select>
+          <div className="space-y-8">
+            {/* What do you need? */}
+            <div>
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-[#22223B] mb-3">What do you need designed? *</label>
+                <p className="text-sm text-gray-600 mb-3">It's okay if you're not sure about the details — we'll guide you.</p>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Deadline *</label>
-                <input
-                  type="date"
-                  name="deadline"
-                  value={formData.deadline}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                />
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {[
+                  { value: 'Logo Design', label: '🎯 Logo' },
+                  { value: 'Flyer', label: '📄 Flyer' },
+                  { value: 'Business Cards', label: '💳 Business Cards' },
+                  { value: 'Social Media', label: '📱 Social Media' },
+                  { value: 'Poster', label: '📌 Poster' },
+                  { value: 'Other', label: '✨ Other' }
+                ].map(option => (
+                  <label key={option.value} className="relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all" style={{
+                    borderColor: formData.projectType === option.value ? '#0057FF' : '#e5e7eb',
+                    backgroundColor: formData.projectType === option.value ? '#0057FF15' : 'white'
+                  }}>
+                    <input
+                      type="radio"
+                      name="projectType"
+                      value={option.value}
+                      checked={formData.projectType === option.value}
+                      onChange={handleChange}
+                      required
+                      className="sr-only"
+                    />
+                    <span className="text-center flex-1 font-medium text-[#22223B]">{option.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
 
+            {/* About your project */}
             <div>
-              <label className="block text-sm font-semibold text-[#22223B] mb-2">Brand Description / Project Goals *</label>
+              <label className="block text-sm font-semibold text-[#22223B] mb-2">Tell us about your project *</label>
+              <p className="text-sm text-gray-600 mb-3">Who are you? What's your business about? What's the main message?</p>
               <textarea
                 name="brandDescription"
                 value={formData.brandDescription}
                 onChange={handleChange}
-                placeholder="Describe your brand, company, or project..."
+                placeholder="E.g., I'm a fitness coach helping busy professionals get fit. I want a logo that says 'strong and approachable'."
                 required
                 rows="4"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Target Audience</label>
-                <input
-                  type="text"
-                  name="targetAudience"
-                  value={formData.targetAudience}
-                  onChange={handleChange}
-                  placeholder="e.g., Young professionals, Tech enthusiasts"
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Preferred Styles</label>
-                <input
-                  type="text"
-                  name="preferredStyles"
-                  value={formData.preferredStyles}
-                  onChange={handleChange}
-                  placeholder="e.g., Modern, Minimalist, Retro"
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                />
+            {/* Who will see this? */}
+            <div>
+              <label className="block text-sm font-semibold text-[#22223B] mb-2">Who will see this? (Optional)</label>
+              <p className="text-sm text-gray-600 mb-3">E.g., young professionals, parents, students</p>
+              <input
+                type="text"
+                name="targetAudience"
+                value={formData.targetAudience}
+                onChange={handleChange}
+                placeholder="Not sure? We can help figure this out."
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+              />
+            </div>
+
+            {/* What's the vibe? */}
+            <div>
+              <label className="block text-sm font-semibold text-[#22223B] mb-3">What's the overall feel? (Optional)</label>
+              <p className="text-sm text-gray-600 mb-3">Choose what resonates with you, or we can decide together.</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {[
+                  { value: 'Clean & Simple', emoji: '✨' },
+                  { value: 'Bold & Eye-catching', emoji: '⚡' },
+                  { value: 'Elegant & Professional', emoji: '🎩' },
+                  { value: 'Playful & Fun', emoji: '🎨' },
+                  { value: 'Minimal & Modern', emoji: '◻️' },
+                  { value: 'Classic & Timeless', emoji: '📚' },
+                  { value: 'Not sure yet', emoji: '🤔' }
+                ].map(option => (
+                  <label key={option.value} className="relative flex flex-col items-center p-3 border rounded-lg cursor-pointer transition-all" style={{
+                    borderColor: formData.preferredStyles === option.value ? '#0057FF' : '#e5e7eb',
+                    backgroundColor: formData.preferredStyles === option.value ? '#0057FF15' : 'white'
+                  }}>
+                    <input
+                      type="radio"
+                      name="preferredStyles"
+                      value={option.value}
+                      checked={formData.preferredStyles === option.value}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <span className="text-2xl mb-1">{option.emoji}</span>
+                    <span className="text-xs text-center font-medium text-[#22223B]">{option.value}</span>
+                  </label>
+                ))}
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            {/* Colors and fonts - simplified */}
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Primary Color Preference</label>
+                <label className="block text-sm font-semibold text-[#22223B] mb-2">Color preference? (Optional)</label>
+                <p className="text-sm text-gray-600 mb-3">Pick your favorite color, or we'll choose for you.</p>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
                     name="colorPreference"
                     value={formData.colorPreference}
                     onChange={handleColorChange}
-                    className="w-12 h-12 rounded cursor-pointer"
+                    className="w-16 h-16 rounded cursor-pointer border-2 border-gray-300"
                   />
                   <span className="text-sm text-gray-600">{formData.colorPreference}</span>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Typography Preferences</label>
+                <label className="block text-sm font-semibold text-[#22223B] mb-2">Font style? (Optional)</label>
+                <p className="text-sm text-gray-600 mb-3">Easy to read? Bold? Elegant?</p>
                 <input
                   type="text"
                   name="typographyPrefs"
                   value={formData.typographyPrefs}
                   onChange={handleChange}
-                  placeholder="e.g., Sans-serif, Bold, Contemporary"
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  placeholder="E.g., Easy to read, Bold & strong"
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            {/* Size and timeline */}
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Dimensions / Format</label>
+                <label className="block text-sm font-semibold text-[#22223B] mb-2">What size? (Optional)</label>
+                <p className="text-sm text-gray-600 mb-3">E.g., A4 page, square for social media, any size</p>
                 <input
                   type="text"
                   name="dimensions"
                   value={formData.dimensions}
                   onChange={handleChange}
-                  placeholder="e.g., 1200x800px, A4, Square"
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  placeholder="Not sure? We'll figure it out."
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Budget Range (Optional)</label>
+                <label className="block text-sm font-semibold text-[#22223B] mb-2">When do you need it? *</label>
                 <input
-                  type="text"
-                  name="budget"
-                  value={formData.budget}
+                  type="date"
+                  name="deadline"
+                  value={formData.deadline}
                   onChange={handleChange}
-                  placeholder="e.g., ₦5000 - ₦10000"
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                  required
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
                 />
               </div>
+            </div>
+
+            {/* Budget */}
+            <div>
+              <label className="block text-sm font-semibold text-[#22223B] mb-2">Budget? (Optional)</label>
+              <p className="text-sm text-gray-600 mb-3">Helps us understand your expectations. Leave blank if you'd like us to suggest.</p>
+              <input
+                type="text"
+                name="budget"
+                value={formData.budget}
+                onChange={handleChange}
+                placeholder="E.g., ₦5,000 - ₦15,000"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+              />
             </div>
           </div>
         );
       
       case 'Software Development':
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
+            {/* What do you want to build? */}
             <div>
-              <label className="block text-sm font-semibold text-[#22223B] mb-2">Project Scope *</label>
+              <label className="block text-sm font-semibold text-[#22223B] mb-3">What do you want to build? *</label>
+              <p className="text-sm text-gray-600 mb-4">Don't worry about technical details. Tell us your idea in simple words. We'll work out the rest together.</p>
               <textarea
                 name="projectScope"
                 value={formData.projectScope}
                 onChange={handleChange}
-                placeholder="Describe what you want to build..."
+                placeholder="E.g., I want a website where customers can order food online and pay with their card. OR I need an app where teachers can track student attendance."
                 required
-                rows="4"
-                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                rows="5"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Preferred Tech Stack</label>
-                <input
-                  type="text"
-                  name="techStack"
-                  value={formData.techStack}
-                  onChange={handleChange}
-                  placeholder="e.g., React, Node.js, MongoDB"
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#22223B] mb-2">Timeline</label>
-                <input
-                  type="text"
-                  name="timeline"
-                  value={formData.timeline}
-                  onChange={handleChange}
-                  placeholder="e.g., 2-3 months"
-                  className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
-                />
-              </div>
+            {/* Who will use it? */}
+            <div>
+              <label className="block text-sm font-semibold text-[#22223B] mb-2">Who will use this? (Optional)</label>
+              <p className="text-sm text-gray-600 mb-3">Customers? Employees? The general public?</p>
+              <input
+                type="text"
+                name="targetAudience"
+                value={formData.targetAudience}
+                onChange={handleChange}
+                placeholder="E.g., Restaurant customers, School staff, Small business owners"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+              />
             </div>
 
+            {/* Timeline */}
             <div>
-              <label className="block text-sm font-semibold text-[#22223B] mb-2">Budget Range (Optional)</label>
+              <label className="block text-sm font-semibold text-[#22223B] mb-2">When do you need it ready? (Optional)</label>
+              <p className="text-sm text-gray-600 mb-3">A rough timeframe helps us plan better.</p>
+              <input
+                type="text"
+                name="timeline"
+                value={formData.timeline}
+                onChange={handleChange}
+                placeholder="E.g., 1-2 months, ASAP, 3 months"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+              />
+            </div>
+
+            {/* Do you have preferences? */}
+            <div>
+              <label className="block text-sm font-semibold text-[#22223B] mb-3">Do you have tech preferences? (Optional)</label>
+              <p className="text-sm text-gray-600 mb-3">If you have experience with specific tools, let us know. Otherwise, we'll recommend the best options for your project.</p>
+              <input
+                type="text"
+                name="techStack"
+                value={formData.techStack}
+                onChange={handleChange}
+                placeholder="E.g., WordPress, React, Python... or 'I'm not sure, surprise me!'"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+              />
+            </div>
+
+            {/* Budget */}
+            <div>
+              <label className="block text-sm font-semibold text-[#22223B] mb-2">What's your budget? (Optional)</label>
+              <p className="text-sm text-gray-600 mb-3">Helps us suggest the right solution. Leave blank if unsure.</p>
               <input
                 type="text"
                 name="budget"
                 value={formData.budget}
                 onChange={handleChange}
-                placeholder="e.g., $5000-$10000"
-                className="w-full px-4 py-2 border rounded-[2.5rem] focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
+                placeholder="E.g., ₦100,000 - ₦500,000 or $5,000-$15,000"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0057FF]"
               />
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                ℹ️ <strong>Tip:</strong> The more details you share, the better we can help. But it's totally okay if your idea is rough or you're not sure about something — that's what we're here for!
+              </p>
             </div>
           </div>
         );
