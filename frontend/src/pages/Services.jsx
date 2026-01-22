@@ -81,26 +81,24 @@ const Services = () => {
       ) : (
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3 w-full max-w-6xl">
           {services.map((s, i) => (
-            <div
+            <Link
               key={s.id || i}
-              className="group relative bg-white/80 backdrop-blur-lg border border-white/30 p-8 pt-12 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden text-center flex flex-col items-center justify-center"
+              to={`/project-request?service=${getServiceParam(s.title)}`}
+              className="group relative bg-white/80 backdrop-blur-lg border border-white/30 p-8 pt-12 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden text-center flex flex-col items-center justify-center hover:border-[#0057FF]/50 hover:scale-105 cursor-pointer"
               style={{ minHeight: 320 }}
             >
               <div className="absolute top-0 left-0 w-full h-3 rounded-t-[2.5rem] bg-[#0057FF]" />
               <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[2.5rem]" />
-              <div className="relative z-10">
+              <div className="relative z-10 w-full">
                 <div className="text-6xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:text-[#0057FF]">
                   {s.icon}
                 </div>
                 <h3 className="font-bold text-2xl mb-3 text-[#22223B] group-hover:text-[#0057FF] transition-colors">
                   {s.title}
                 </h3>
-                <p className="text-gray-600">{s.description}</p>
-                <div className="mt-6 flex gap-3">
-                  <Link
-                    to={`/project-request?service=${getServiceParam(s.title)}`}
-                    className="flex-1 inline-flex items-center justify-center text-[#0057FF] font-medium hover:underline text-sm"
-                  >
+                <p className="text-gray-600 mb-6">{s.description}</p>
+                <div className="mt-6 flex gap-3 justify-center">
+                  <div className="flex-1 inline-flex items-center justify-center text-[#0057FF] font-medium text-sm group-hover:underline">
                     Get Started
                     <svg
                       className="ml-1 w-4 h-4"
@@ -115,19 +113,20 @@ const Services = () => {
                         d="M14 5l7 7m0 0l-7 7m7-7H3"
                       ></path>
                     </svg>
-                  </Link>
+                  </div>
                   <a
                     href={`https://wa.me/2349039223824?text=${encodeURIComponent(`Hello Smarthubz Team, I'd like to start a project. I'm interested in ${s.title}. Please let me know the next steps.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-3 py-2 bg-[#25D366] text-white rounded hover:bg-[#128C7E] transition-colors text-sm font-medium"
                     title="Chat on WhatsApp"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     💬
                   </a>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
         )}

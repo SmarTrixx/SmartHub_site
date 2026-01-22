@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import portfolioItems from "../data/portfolio";
-import { FiArrowRight, FiSearch, FiX, FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+import { FiArrowRight, FiSearch, FiX, FiGithub, FiLinkedin, FiMail, FiZoomIn } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -13,6 +13,7 @@ const Portfolio = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
   const navigate = useNavigate();
 
   // Fetch projects from API
@@ -359,7 +360,7 @@ const Portfolio = () => {
 
               <div className="p-8">
                 <div className="grid md:grid-cols-2 gap-8 mb-8">
-                  <div className="rounded-xl overflow-hidden">
+                  <div className="rounded-xl overflow-hidden relative group">
                     <img
                       src={(() => {
                         let imageUrl = selectedItem.image || '/android-chrome-512x512.png';
@@ -370,11 +371,22 @@ const Portfolio = () => {
                         return imageUrl;
                       })()}
                       alt={selectedItem.title}
-                      className="w-full h-auto object-cover"
+                      className="w-full h-auto object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                      onClick={() => setFullscreenImage((() => {
+                        let imageUrl = selectedItem.image || '/android-chrome-512x512.png';
+                        if (imageUrl.startsWith('/uploads/')) {
+                          const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                          imageUrl = `${baseUrl}${imageUrl}`;
+                        }
+                        return imageUrl;
+                      })())}
                       onError={(e) => {
                         e.target.src = '/android-chrome-512x512.png';
                       }}
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                      <FiZoomIn className="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
                   </div>
                   <div>
                     <h2 className="text-3xl font-bold text-[#0057FF] mb-4">
@@ -443,6 +455,47 @@ const Portfolio = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen Image Modal */}
+      <AnimatePresence>
+        {fullscreenImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm"
+            onClick={() => setFullscreenImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setFullscreenImage(null)}
+                className="absolute top-6 right-6 p-3 rounded-full bg-white/20 hover:bg-white/40 transition-colors z-10"
+              >
+                <FiX className="text-white text-3xl" />
+              </button>
+
+              <img
+                src={fullscreenImage}
+                alt="Fullscreen view"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.target.src = '/android-chrome-512x512.png';
+                }}
+              />
+
+              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-sm">
+                Click anywhere to close
               </div>
             </motion.div>
           </motion.div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiX } from "react-icons/fi";
 import portfolioItems from "../data/portfolio";
 import axios from "axios";
 
@@ -46,6 +47,8 @@ const Home = () => {
   const [projects, setProjects] = useState([]);
   const [stats, setStats] = useState(defaultStats);
   const [, setLoading] = useState(true);
+  const [selectedPortfolioItem, setSelectedPortfolioItem] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let i = 0;
@@ -343,13 +346,14 @@ const Home = () => {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.1 }}
+                      onClick={() => setSelectedPortfolioItem(item)}
                       className={`
-                        flex-shrink-0 bg-white/40 backdrop-blur-lg border border-white/30 shadow-xl transition-all duration-300 hover:shadow-2xl
+                        flex-shrink-0 bg-white/40 backdrop-blur-lg border border-white/30 shadow-xl transition-all duration-300 hover:shadow-2xl cursor-pointer
                         ${isCenter
                           ? "w-72 h-[22rem] md:w-96 shadow-3xl  md:h-[26rem] scale-105 z-10"
                           : "w-40 h-60 md:w-56 md:h-72 scale-90 opacity-60 z-0"
                         }
-                        rounded-[3rem] flex flex-col items-center overflow-hidden
+                        rounded-[3rem] flex flex-col items-center overflow-hidden hover:border-[#0057FF]/50
                       `}
                       style={{
                         boxShadow: isCenter ? "0 8px 32px 0 #ff0000" : undefined,
@@ -447,6 +451,75 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+      {/* Portfolio Showcase Modal */}
+      <AnimatePresence>
+        {selectedPortfolioItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedPortfolioItem(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 50 }}
+              className="relative bg-white rounded-[3rem] max-w-2xl w-full overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setSelectedPortfolioItem(null)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10"
+              >
+                <FiX className="text-gray-700 text-2xl" />
+              </button>
+
+              <div className="p-8">
+                <div className="rounded-2xl overflow-hidden mb-6">
+                  <img
+                    src={(() => {
+                      let imageUrl = selectedPortfolioItem.image || '/images/placeholder.jpg';
+                      if (selectedPortfolioItem.images && Array.isArray(selectedPortfolioItem.images) && selectedPortfolioItem.images.length > 0) {
+                        imageUrl = selectedPortfolioItem.images[0];
+                      }
+                      if (imageUrl.startsWith('/uploads/')) {
+                        const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+                        imageUrl = `${baseUrl}${imageUrl}`;
+                      }
+                      return imageUrl;
+                    })()}
+                    alt={selectedPortfolioItem.title}
+                    className="w-full h-auto object-cover max-h-96"
+                    onError={(e) => {
+                      e.target.src = '/images/placeholder.jpg';
+                    }}
+                  />
+                </div>
+
+                <h2 className="text-3xl font-bold text-[#0057FF] mb-4">
+                  {selectedPortfolioItem.title}
+                </h2>
+
+                <p className="text-gray-700 mb-6 text-lg">
+                  {selectedPortfolioItem.desc || selectedPortfolioItem.description}
+                </p>
+
+                <div className="flex gap-4">
+                  <Link
+                    to="/portfolio"
+                    onClick={() => setSelectedPortfolioItem(null)}
+                    className="flex-1 inline-block text-center bg-[#0057FF] text-white px-8 py-3 rounded-full font-bold hover:bg-[#0047D4] transition-colors"
+                  >
+                    View Full Portfolio
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       </div>
     </div>
   );
